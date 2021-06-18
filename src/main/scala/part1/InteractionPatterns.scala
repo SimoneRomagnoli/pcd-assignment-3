@@ -9,8 +9,6 @@ import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.util.Success
 
-import org.apache.pdfbox
-
 object HelloBehavior {
   final case class Greet(whom: String, replyTo: ActorRef[Greeted])
   final case class Greeted(whom: String, from: ActorRef[Greet])

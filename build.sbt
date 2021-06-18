@@ -15,4 +15,5 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-multi-node-testkit"    % akkaVersion % Test,
   "org.scalatest" %% "scalatest" % "3.1.0" % Test,
   "org.apache.pdfbox" % "pdfbox" % "2.0.22",
+  "org.scalafx" %% "scalafx" % "16.0.0-R24"
 )
