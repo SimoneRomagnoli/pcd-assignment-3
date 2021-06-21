@@ -72,22 +72,46 @@ object SplitFilterCountBehavior {
 
   def apply(ignoredWords:List[String]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
     ctx.log.info(s"Start processing raw text of document ${msg.title}")
-    var occurrences: scala.collection.immutable.Map[String, Int] = Map()
+    var occ: List[Occurrences] = List()
     val filteredWords = msg.text.split(REGEX).filter(word => !ignoredWords.contains(word))
-    filteredWords.partition(occurrences.contains(_))
+
     for(word <- filteredWords) {
-      if(occurrences.contains(word)) {
-        occurrences = occurrences + (word -> (occurrences(word)+1))
+      if(occ.exists(oc => oc.word == word)) {
+        occ.filter(oc => oc.word == word).head.increment
       } else {
-        occurrences = occurrences + (word -> 1)
+        occ = Occurrences(word, 1) :: occ
       }
     }
-    ctx.log.info("entire map is "+occurrences)
-    ctx.log.info("top words are: "+occurrences.keySet.toList.sorted((a:String,b:String) => occurrences(b)-occurrences(a)).slice(0,5).toString())
-
+    ctx.log.info("entire list is "+occ)
+    ctx.log.info("top list words are: "+occ.sorted((a:Occurrences,b:Occurrences) => b.occurrences-a.occurrences).slice(0,5).toString())
     Behaviors.stopped
   }
 }
+
+case class Occurrences(word:String, var occurrences:Int) {
+  def increment = occurrences += 1
+}
+
+case class WordCounter(
+  var system:ActorSystem[String] = ActorSystem[String](Behaviors.setup { ctx =>
+
+    val ignoredWords = List("document", "PDF", "", " ")
+
+    val counter = ctx.spawn(Counter(ignoredWords), "counter")
+    val stripper = ctx.spawn(Stripper(counter), "stripper")
+    val extractor = ctx.spawn(Extractor(stripper), "extractor")
+
+    Behaviors.receiveMessage {
+      case "" =>
+        ctx.log.info("Received empty directory")
+        Behaviors.stopped
+      case msg =>
+        ctx.log.info(s"Received message $msg")
+        extractor ! Directory(msg)
+        Behaviors.same
+    }
+  }, name = "actor-based-word-counter")
+)
 
 object WordCounter extends App {
   val system = ActorSystem[String](Behaviors.setup { ctx =>

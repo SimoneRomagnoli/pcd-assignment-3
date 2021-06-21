@@ -2,8 +2,10 @@ package part1
 
 import javafx.event.ActionEvent
 import scalafx.application.{JFXApp, JFXApp3}
+import scalafx.beans.property.StringProperty
+import scalafx.collections.ObservableBuffer
 import scalafx.scene.Scene
-import scalafx.scene.control.{Button, Label, TextField}
+import scalafx.scene.control.{Button, Label, Spinner, SpinnerValueFactory, TableColumn, TableView, TextField}
 import scalafx.stage.{DirectoryChooser, FileChooser}
 
 import java.io.File
@@ -23,6 +25,15 @@ object GraphicalUserInterface extends JFXApp {
   var pdfDirectory = "."
   var excludedWordsFile:File = null
   var limitWords = 5
+
+  val wordCounter: WordCounter = WordCounter()
+
+  case class ObservableOccurrences(_word:String, _occurrences:Int) {
+    val word = new StringProperty(this, "word", _word)
+    val occurrences = new StringProperty(this, "occurrences", _occurrences.toString)
+  }
+
+  val occurrences: ObservableBuffer[ObservableOccurrences] = null
 
   stage = new JFXApp.PrimaryStage {
     title = "Actor-based Word Counter"
@@ -81,12 +92,44 @@ object GraphicalUserInterface extends JFXApp {
       limitLabel.layoutY = HEIGHT %% 65
       content.add(limitLabel)
 
-      val limitTextField = new TextField()
-      limitTextField.layoutX = WIDTH %% 5
-      limitTextField.layoutY = HEIGHT %% 70
-      limitTextField.setMinWidth(WIDTH %% 10)
-      limitTextField.text = limitWords.toString
-      content.add(limitTextField)
+      val limitSpinner = new Spinner[Integer]
+      limitSpinner.layoutX = WIDTH %% 5
+      limitSpinner.layoutY = HEIGHT %% 70
+      limitSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1,50, 5))
+      limitSpinner.onMouseClicked = _ => {
+        limitWords = limitSpinner.value.value
+      }
+      content.add(limitSpinner)
+
+      //OUTPUT TABLE
+      val tableOutput = new TableView[ObservableOccurrences](occurrences) {
+        columns ++= List(
+          new TableColumn[ObservableOccurrences, String] {
+            text = "Word"
+            cellValueFactory = { _.value.word }
+            prefWidth = 100
+          },
+          new TableColumn[ObservableOccurrences, String] {
+            text = "Occurrences"
+            cellValueFactory = { _.value.occurrences }
+            prefWidth = 100
+          }
+        )
+      }
+      tableOutput.layoutX = WIDTH %% 50
+      tableOutput.layoutY = HEIGHT %% 5
+      tableOutput.setMinWidth(WIDTH %% 40)
+      tableOutput.setMinHeight(HEIGHT %% 40)
+      content.add(tableOutput)
+
+      //START-STOP BUTTONS
+      val startButton = new Button("Start")
+      startButton.layoutX = WIDTH %% 50
+      startButton.layoutY = HEIGHT %% 80
+      startButton.onAction = (e:ActionEvent) => {
+        wordCounter.system ! pdfDirectory
+      }
+      content.add(startButton)
     }
   }
 
