@@ -26,14 +26,14 @@ object GraphicalUserInterface extends JFXApp {
   var excludedWordsFile:File = null
   var limitWords = 5
 
-  val wordCounter: WordCounter = WordCounter()
-
   case class ObservableOccurrences(_word:String, _occurrences:Int) {
     val word = new StringProperty(this, "word", _word)
     val occurrences = new StringProperty(this, "occurrences", _occurrences.toString)
   }
 
   val occurrences: ObservableBuffer[ObservableOccurrences] = null
+
+  val wordCounter: WordCounter = WordCounter(occurrences)
 
   stage = new JFXApp.PrimaryStage {
     title = "Actor-based Word Counter"
@@ -127,7 +127,7 @@ object GraphicalUserInterface extends JFXApp {
       startButton.layoutX = WIDTH %% 50
       startButton.layoutY = HEIGHT %% 80
       startButton.onAction = (e:ActionEvent) => {
-        wordCounter.system ! pdfDirectory
+        wordCounter ! pdfDirectory
       }
       content.add(startButton)
     }

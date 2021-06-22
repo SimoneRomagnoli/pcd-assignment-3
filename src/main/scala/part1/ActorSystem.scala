@@ -4,6 +4,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
+import part1.GraphicalUserInterface.ObservableOccurrences
 import part1.Messages.{Directory, Pdf, Text}
 
 import java.io.File
@@ -59,9 +60,9 @@ object StripBehavior {
 }
 
 object Counter {
-  def apply(ignoredWords:List[String]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
+  def apply(ignoredWords:List[String], occurrences:List[ObservableOccurrences]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
     ctx.log.info(s"Received raw text of document ${msg.title}")
-    val child = ctx.spawn(SplitFilterCountBehavior(ignoredWords), msg.title)
+    val child = ctx.spawn(SplitFilterCountBehavior(ignoredWords, occurrences), msg.title)
     child ! msg
     Behaviors.same
   }
@@ -70,55 +71,34 @@ object Counter {
 object SplitFilterCountBehavior {
   val REGEX = "[^a-zA-Z0-9]"
 
-  def apply(ignoredWords:List[String]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
+  def apply(ignoredWords:List[String], globalOccurrences:List[ObservableOccurrences]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
     ctx.log.info(s"Start processing raw text of document ${msg.title}")
-    var occ: List[Occurrences] = List()
+    var occurrences: List[Occurrences] = List()
     val filteredWords = msg.text.split(REGEX).filter(word => !ignoredWords.contains(word))
 
     for(word <- filteredWords) {
-      if(occ.exists(oc => oc.word == word)) {
-        occ.filter(oc => oc.word == word).head.increment
+      if(occurrences.exists(oc => oc.word == word)) {
+        occurrences.filter(oc => oc.word == word).head.increment()
       } else {
-        occ = Occurrences(word, 1) :: occ
+        occurrences = Occurrences(word, 1) :: occurrences
       }
     }
-    ctx.log.info("entire list is "+occ)
-    ctx.log.info("top list words are: "+occ.sorted((a:Occurrences,b:Occurrences) => b.occurrences-a.occurrences).slice(0,5).toString())
+    ctx.log.info("entire list is "+occurrences)
+    ctx.log.info("top list words are: "+occurrences.sorted((a:Occurrences,b:Occurrences) => b.occurrences-a.occurrences).slice(0,5).toString())
     Behaviors.stopped
   }
 }
 
 case class Occurrences(word:String, var occurrences:Int) {
-  def increment = occurrences += 1
+  def increment(): Unit = occurrences += 1
 }
 
-case class WordCounter(
-  var system:ActorSystem[String] = ActorSystem[String](Behaviors.setup { ctx =>
+case class WordCounter(occurrences: List[ObservableOccurrences]) {
+  val system:ActorSystem[String] = ActorSystem[String](Behaviors.setup { ctx =>
 
     val ignoredWords = List("document", "PDF", "", " ")
 
-    val counter = ctx.spawn(Counter(ignoredWords), "counter")
-    val stripper = ctx.spawn(Stripper(counter), "stripper")
-    val extractor = ctx.spawn(Extractor(stripper), "extractor")
-
-    Behaviors.receiveMessage {
-      case "" =>
-        ctx.log.info("Received empty directory")
-        Behaviors.stopped
-      case msg =>
-        ctx.log.info(s"Received message $msg")
-        extractor ! Directory(msg)
-        Behaviors.same
-    }
-  }, name = "actor-based-word-counter")
-)
-
-object WordCounter extends App {
-  val system = ActorSystem[String](Behaviors.setup { ctx =>
-
-    val ignoredWords = List("document", "PDF", "", " ")
-
-    val counter = ctx.spawn(Counter(ignoredWords), "counter")
+    val counter = ctx.spawn(Counter(ignoredWords, occurrences), "counter")
     val stripper = ctx.spawn(Stripper(counter), "stripper")
     val extractor = ctx.spawn(Extractor(stripper), "extractor")
 
@@ -133,5 +113,5 @@ object WordCounter extends App {
     }
   }, name = "actor-based-word-counter")
 
-  system ! "res"
+  def !(msg:String): Unit = system ! msg
 }
