@@ -1,6 +1,9 @@
 package part1
 
+import javafx.beans.binding.Bindings
+import javafx.collections.transformation.FilteredList
 import javafx.event.ActionEvent
+import part1.Messages.Parameters
 import scalafx.application.{JFXApp, JFXApp3}
 import scalafx.beans.property.StringProperty
 import scalafx.collections.ObservableBuffer
@@ -26,12 +29,16 @@ object GraphicalUserInterface extends JFXApp {
   var excludedWordsFile:File = null
   var limitWords = 5
 
-  case class ObservableOccurrences(_word:String, _occurrences:Int) {
+  case class ObservableOccurrences(_word:String, var _occurrences:Int) {
     val word = new StringProperty(this, "word", _word)
-    val occurrences = new StringProperty(this, "occurrences", _occurrences.toString)
+    var occurrences = new StringProperty(this, "occurrences", _occurrences.toString)
   }
 
-  val occurrences: ObservableBuffer[ObservableOccurrences] = null
+  val occurrences: ObservableBuffer[ObservableOccurrences] =
+    new ObservableBuffer[ObservableOccurrences]()
+
+  val filteredOccurrences: FilteredList[ObservableOccurrences] =
+    new FilteredList[ObservableOccurrences](occurrences)
 
   val wordCounter: WordCounter = WordCounter(occurrences)
 
@@ -107,19 +114,22 @@ object GraphicalUserInterface extends JFXApp {
           new TableColumn[ObservableOccurrences, String] {
             text = "Word"
             cellValueFactory = { _.value.word }
-            prefWidth = 100
+            prefWidth = WIDTH %% 20
           },
           new TableColumn[ObservableOccurrences, String] {
             text = "Occurrences"
             cellValueFactory = { _.value.occurrences }
-            prefWidth = 100
+            prefWidth = WIDTH %% 20
+
           }
         )
       }
+      tableOutput.setFixedCellSize(25)
+      tableOutput.prefHeightProperty().bind(Bindings.size(tableOutput.getItems).multiply(tableOutput.getFixedCellSize).add(30));
       tableOutput.layoutX = WIDTH %% 50
       tableOutput.layoutY = HEIGHT %% 5
       tableOutput.setMinWidth(WIDTH %% 40)
-      tableOutput.setMinHeight(HEIGHT %% 40)
+      tableOutput.setMaxHeight(HEIGHT %% 50)
       content.add(tableOutput)
 
       //START-STOP BUTTONS
@@ -127,7 +137,7 @@ object GraphicalUserInterface extends JFXApp {
       startButton.layoutX = WIDTH %% 50
       startButton.layoutY = HEIGHT %% 80
       startButton.onAction = (e:ActionEvent) => {
-        wordCounter ! pdfDirectory
+        wordCounter ! Parameters(pdfDirectory, excludedWordsFile, limitWords)
       }
       content.add(startButton)
     }
