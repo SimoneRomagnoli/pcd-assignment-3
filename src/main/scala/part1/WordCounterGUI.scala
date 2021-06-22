@@ -14,7 +14,7 @@ import scalafx.stage.{DirectoryChooser, FileChooser}
 import java.io.File
 
 
-object GraphicalUserInterface extends JFXApp {
+object WordCounterGUI extends JFXApp {
 
   val WIDTH:Double = 800
   val HEIGHT:Double = 600

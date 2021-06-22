@@ -4,7 +4,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
-import part1.GraphicalUserInterface.ObservableOccurrences
+import part1.WordCounterGUI.ObservableOccurrences
 import part1.Messages.{Directory, Parameters, Pdf, Text, Words}
 import scalafx.collections.ObservableBuffer
 
