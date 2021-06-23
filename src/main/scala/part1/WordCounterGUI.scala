@@ -9,6 +9,7 @@ import scalafx.beans.property.StringProperty
 import scalafx.collections.ObservableBuffer
 import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label, Spinner, SpinnerValueFactory, TableColumn, TableView, TextField}
+import scalafx.scene.text.Font.font
 import scalafx.stage.{DirectoryChooser, FileChooser}
 
 import java.io.File
@@ -36,9 +37,6 @@ object WordCounterGUI extends JFXApp {
 
   val occurrences: ObservableBuffer[ObservableOccurrences] =
     new ObservableBuffer[ObservableOccurrences]()
-
-  val filteredOccurrences: FilteredList[ObservableOccurrences] =
-    new FilteredList[ObservableOccurrences](occurrences)
 
   val wordCounter: WordCounter = WordCounter(occurrences)
 
@@ -140,6 +138,8 @@ object WordCounterGUI extends JFXApp {
         wordCounter ! Parameters(pdfDirectory, excludedWordsFile, limitWords)
       }
       content.add(startButton)
+
+      content.forEach(el => el.setStyle("-fx-font: 12 arial;"))
     }
   }
 
