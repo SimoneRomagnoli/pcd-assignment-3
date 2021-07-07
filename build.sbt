@@ -4,6 +4,8 @@ version := "0.1"
 
 scalaVersion := "2.13.6"
 
+resourceDirectory in Compile := baseDirectory.value / "resources"
+
 lazy val akkaVersion = "2.6.14"
 
 lazy val osName = System.getProperty("os.name") match {
