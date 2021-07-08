@@ -1,7 +1,7 @@
-package part1v2;
+package part1;
 
-import part1v2.controller.Controller;
-import part1v2.view.View;
+import part1.controller.Controller;
+import part1.view.View;
 
 /**
 * Main of the program:

@@ -1,4 +1,4 @@
-package part1v2.controller;
+package part1.controller;
 
 public class Flag {
 

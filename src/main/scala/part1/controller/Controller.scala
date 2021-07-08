@@ -1,7 +1,7 @@
-package part1v2.controller
-import part1v2.model.Messages.Parameters
-import part1v2.model.WordCounter
-import part1v2.view.View
+package part1.controller
+import part1.model.Messages.Parameters
+import part1.model.WordCounter
+import part1.view.View
 import scala.jdk.CollectionConverters._
 
 import java.io.File

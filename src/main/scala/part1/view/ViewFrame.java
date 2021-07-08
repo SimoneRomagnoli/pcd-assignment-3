@@ -1,11 +1,11 @@
-package part1v2.view;
+package part1.view;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
-import part1v2.controller.InputListener;
+import part1.controller.InputListener;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

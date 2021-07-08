@@ -1,6 +1,6 @@
-package part1v2.view;
+package part1.view;
 
-import part1v2.controller.InputListener;
+import part1.controller.InputListener;
 
 import java.util.Map;
 
