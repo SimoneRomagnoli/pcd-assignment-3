@@ -19,6 +19,8 @@ libraryDependencies ++= javaFXModules.map( m=>
   "org.openjfx" % s"javafx-$m" % "11" classifier osName
 )
 
+libraryDependencies += "org.jfree" % "jfreechart" % "1.0.14"
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-typed" % akkaVersion,

@@ -1,23 +1,23 @@
-package part1
+package part1v2.model
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
-import part1.WordCounterGUI.ObservableOccurrences
-import part1.Messages.{Directory, Parameters, Pdf, Text, Words}
-import scalafx.collections.ObservableBuffer
+import part1v2.controller.Controller
 
 import java.io.File
 import java.nio.file.{Files, Paths}
 import java.util.Scanner
+import java.util.stream.Collectors
+import part1v2.model.Messages._
 
 object Messages {
   final case class Parameters(directoryPath:String, file:File, limit:Int)
   final case class Directory(path: String)
   final case class Pdf(document: PDDocument, title:String)
   final case class Text(text: String, title:String)
-  final case class Words(words: List[Occurrences], title:String)
+  final case class Occurrences(words: Map[String, Int], title:String)
 }
 
 object Extractor {
@@ -65,66 +65,46 @@ object StripBehavior {
 }
 
 object Counter {
-  def apply(ignoredWords:List[String], gatherer: ActorRef[Words]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
-    ctx.log.info(s"Received raw text of document ${msg.title}")
-    val child = ctx.spawn(SplitFilterCountBehavior(ignoredWords, gatherer), msg.title)
-    child ! msg
-    Behaviors.same
-  }
-}
-
-object SplitFilterCountBehavior {
   val REGEX = "[^a-zA-Z0-9]"
-
-  def apply(ignoredWords:List[String], gatherer: ActorRef[Words]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
+  def apply(ignoredWords:List[String], gatherer: ActorRef[Occurrences]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
     ctx.log.info(s"Start processing raw text of document ${msg.title}")
-    var occurrences: List[Occurrences] = List()
-
+    var occurrences: Map[String, Int] = Map()
     for(word <- msg.text.split(REGEX).filter(word => !ignoredWords.contains(word))) {
-      if(occurrences.exists(oc => oc.word == word)) {
-        occurrences.filter(oc => oc.word == word).head.increment()
+      if(occurrences.contains(word)) {
+        occurrences = occurrences + (word -> (occurrences(word)+1))
       } else {
-        occurrences = Occurrences(word, 1) :: occurrences
+        occurrences = occurrences + (word -> 1)
       }
     }
-
-    gatherer ! Words(occurrences, msg.title)
-
-    Behaviors.stopped
+    gatherer ! Occurrences(occurrences, msg.title)
+    Behaviors.same
   }
 }
 
 object Gatherer {
-  var globalOccurrences:List[Occurrences] = List()
+  var globalOccurrences:Map[String, Int] = Map();
 
-  def apply(globals:ObservableBuffer[ObservableOccurrences], limit:Int): Behavior[Words] = Behaviors.receive { (ctx, msg) =>
+  def apply(limit: Int, controller: Controller): Behavior[Occurrences] = Behaviors.receive { (ctx, msg) =>
     ctx.log.info(s"Gathering words from file ${msg.title}")
-    for(occurrence <- msg.words) {
-      if(globalOccurrences.exists(go => go.word equals occurrence.word)) {
-        val oldVal = globalOccurrences.filter(go => go.word equals occurrence.word).head.occurrences
-        globalOccurrences = globalOccurrences updated(globalOccurrences.indexOf(Occurrences(occurrence.word, oldVal)), Occurrences(occurrence.word, oldVal+occurrence.occurrences))
+    for((k,v) <- msg.words) {
+      if (globalOccurrences.contains(k)) {
+        globalOccurrences = globalOccurrences + (k -> (globalOccurrences(k) + v))
       } else {
-        globalOccurrences = globalOccurrences appended Occurrences(occurrence.word, occurrence.occurrences)
+        globalOccurrences = globalOccurrences + (k -> v)
       }
     }
-
-    globals.clear()
-    globals.appendAll(
-      globalOccurrences
-        .sorted((a:Occurrences,b:Occurrences) => b.occurrences - a.occurrences)
-        .map(go => ObservableOccurrences(go.word, go.occurrences))
+      controller.update(100,globalOccurrences
+        .keySet
+        .toList
+        .sorted((a:String,b:String) => globalOccurrences(b) - globalOccurrences(a))
         .take(limit)
-    )
-
+        .map((k:String) => k -> Integer.valueOf(globalOccurrences(k))).toMap);
     Behaviors.same
-  }
+    }
+
 }
 
-case class Occurrences(word:String, var occurrences:Int) {
-  def increment(): Unit = occurrences += 1
-}
-
-case class WordCounter(occurrences: ObservableBuffer[ObservableOccurrences]) {
+case class WordCounter(controller: Controller) {
   val system:ActorSystem[Parameters] = ActorSystem[Parameters](Behaviors.setup { ctx =>
 
     Behaviors.receiveMessage {
@@ -138,7 +118,7 @@ case class WordCounter(occurrences: ObservableBuffer[ObservableOccurrences]) {
           excludedWords = excludedWords appended scanner.nextLine()
         }
 
-        val gatherer = ctx.spawn(Gatherer(occurrences, msg.limit), "gatherer")
+        val gatherer = ctx.spawn(Gatherer(msg.limit, controller), "gatherer")
         val counter = ctx.spawn(Counter(excludedWords, gatherer), "counter")
         val stripper = ctx.spawn(Stripper(counter), "stripper")
         val extractor = ctx.spawn(Extractor(stripper), "extractor")
