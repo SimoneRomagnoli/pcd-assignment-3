@@ -9,7 +9,7 @@ import javax.imageio.ImageIO
 import javax.swing._
 import scala.util.Random
 
-case class PuzzleBoard(rows: Int, cols: Int, imgPath: String, var tiles: List[Tile] = List(), selectionManager: SelectionManager = SelectionManager()) extends JFrame {
+case class PuzzleBoard(rows: Int, cols: Int, imgPath: String, starter:Boolean, currentPositions:List[Int] = List(), var tiles: List[Tile] = List(), selectionManager: SelectionManager = SelectionManager()) extends JFrame {
   setTitle("Puzzle")
   setResizable(false)
   setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -31,15 +31,27 @@ case class PuzzleBoard(rows: Int, cols: Int, imgPath: String, var tiles: List[Ti
       val width = img.getWidth
       val height = img.getHeight
 
-      var position = 0
-      var randomPositions: List[Int] = LazyList.iterate(0)(_ + 1).take(rows * cols).toList
-      randomPositions = Random.shuffle(randomPositions)
-      for (i <- 0 until rows; j <- 0 until cols) {
-        val imagePortion: Image = createImage(new FilteredImageSource(img.getSource,
-          new CropImageFilter(j * width / cols, i * height / rows, width / cols, height / rows)))
+      if(starter) {
+        var position = 0
+        var randomPositions: List[Int] = LazyList.iterate(0)(_ + 1).take(rows * cols).toList
+        randomPositions = Random.shuffle(randomPositions)
+        for (i <- 0 until rows; j <- 0 until cols) {
+          val imagePortion: Image = createImage(new FilteredImageSource(img.getSource,
+            new CropImageFilter(j * width / cols, i * height / rows, width / cols, height / rows)))
 
-        tiles = tiles appended Tile(imagePortion, position, randomPositions(position))
-        position += 1
+          tiles = tiles appended Tile(imagePortion, position, randomPositions(position))
+          position += 1
+        }
+      } else {
+
+        var position = 0
+        for (i <- 0 until rows; j <- 0 until cols) {
+          val imagePortion: Image = createImage(new FilteredImageSource(img.getSource,
+            new CropImageFilter(j * width / cols, i * height / rows, width / cols, height / rows)))
+
+          tiles = tiles appended Tile(imagePortion, position, currentPositions(position))
+          position += 1
+        }
       }
     }
   }
