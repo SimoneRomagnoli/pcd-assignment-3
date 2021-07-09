@@ -1,5 +1,7 @@
 package part2.akka
 
+import akka.actor.typed.ActorRef
+import part2.akka.PuzzleBehaviors.SelectionGuardian.{SelectedCell, Selection}
 import part2.akka.Tiles.{SelectionManager, Tile, TileButton}
 
 import java.awt.image.{BufferedImage, CropImageFilter, FilteredImageSource}
@@ -9,7 +11,7 @@ import javax.imageio.ImageIO
 import javax.swing._
 import scala.util.Random
 
-case class PuzzleBoard(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var tiles: List[Tile] = List(), selectionManager: SelectionManager = SelectionManager()) extends JFrame {
+case class PuzzleBoard(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var selectionList:List[Int], selectionGuardian:ActorRef[Selection], var tiles: List[Tile] = List(), selectionManager:SelectionManager = SelectionManager()) extends JFrame {
   setTitle("Puzzle")
   setResizable(false)
   setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -66,6 +68,7 @@ case class PuzzleBoard(rows: Int, cols: Int, starter:Boolean, currentPositions:L
       board.add(btn)
       btn.setBorder(BorderFactory.createLineBorder(Color.gray))
       btn.addActionListener(_ => {
+        selectionGuardian ! SelectedCell(tile.currentPosition)
         selectionManager.selectTile(tile, () => {
           paintPuzzle()
           checkSolution()
@@ -83,4 +86,6 @@ case class PuzzleBoard(rows: Int, cols: Int, starter:Boolean, currentPositions:L
   }
 }
 
-case class PuzzleOptions(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int] = List())
+case class PuzzleOptions(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int] = List(), var selectionList:List[Int] = List()) {
+  selectionList = LazyList.continually(0).take(rows * cols).toList
+}
