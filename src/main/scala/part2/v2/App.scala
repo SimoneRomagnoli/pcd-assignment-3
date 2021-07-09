@@ -1,7 +1,7 @@
-package v2
+package part2.v2
 
-import akka.actor.typed.{ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ActorSystem, Behavior}
 import akka.cluster.typed.Cluster
 import com.typesafe.config.ConfigFactory
 
@@ -12,10 +12,10 @@ object App {
 
       // We use roles, defined in config entry akka.cluster.roles, to help the cluster to organise work
       if (cluster.selfMember.hasRole("starter")) {
-          ctx.spawn(Starter(), s"Starter")
+        ctx.spawn(Starter(), s"Starter")
       }
       if (cluster.selfMember.hasRole("joiner")) {
-        ctx.spawn(Joiner(), "Joiner"+ (cluster.state.members.size-1))
+        ctx.spawn(Joiner(), "Joiner" + (cluster.state.members.size - 1))
       }
       Behaviors.empty
     }
@@ -35,7 +35,8 @@ object App {
   def startup(role: String, port: Int): Unit = {
     // Override the configuration of the port and role
     val config = ConfigFactory
-      .parseString(s"""
+      .parseString(
+        s"""
         akka.remote.artery.canonical.port=$port
         akka.cluster.roles = [$role]
         """)

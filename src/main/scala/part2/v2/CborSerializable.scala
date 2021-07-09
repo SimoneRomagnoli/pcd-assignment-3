@@ -1,4 +1,4 @@
-package v2
+package part2.v2
 
 /**
  * Marker trait to tell Akka to serialize messages into CBOR using Jackson for sending over the network

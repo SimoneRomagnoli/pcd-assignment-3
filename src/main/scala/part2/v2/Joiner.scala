@@ -1,10 +1,8 @@
-package v2
+package part2.v2
 
-import akka.actor.typed.{ActorRef, Behavior}
-import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
+import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import akka.cluster.typed.{Cluster, Join}
-import v2.PlayerBehavior.{Event, Greet}
+import akka.cluster.typed.Cluster
 
 //#joiner
 object Joiner {
@@ -24,4 +22,3 @@ object Joiner {
       Behaviors.stopped
     }
 }
-//#joiner

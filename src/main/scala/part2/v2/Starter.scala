@@ -1,10 +1,8 @@
-package v2
+package part2.v2
 
-import akka.actor.typed._
-import akka.actor.typed.scaladsl._
-import akka.cluster.ClusterEvent._
-import akka.cluster.{ClusterEvent, MemberStatus}
-import akka.cluster.typed._
+import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
+import akka.cluster.typed.Cluster
 
 //#frontend
 object Starter {
@@ -19,8 +17,7 @@ object Starter {
     //cluster.manager ! Join(cluster.selfMember.address);
 
     ctx.spawn(PlayerBehavior(), "player1")
-   // cluster.subscriptions ! Subscribe(subscriber, classOf[ClusterEvent.MemberJoined])
+    // cluster.subscriptions ! Subscribe(subscriber, classOf[ClusterEvent.MemberJoined])
     Behaviors.stopped
   }
 }
-//#frontend
