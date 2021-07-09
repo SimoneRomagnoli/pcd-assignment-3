@@ -7,18 +7,15 @@ import akka.cluster.typed.Cluster
 //#joiner
 object Joiner {
 
-  //val joinerServiceKey = ServiceKey[Joiner.JoinRequest]("joiner")
+  sealed trait Event
+  case class PuzzleReceived(puzzle:PuzzleBoard) extends Event
 
-  sealed trait Command
-  //final case class JoinRequest(text: String, replyTo: ActorRef[TextTransformed]) extends Command with CborSerializable
-  //final case class TextTransformed(text: String) extends CborSerializable
-
-  def apply(): Behavior[Command] =
+  def apply(): Behavior[Event] =
     Behaviors.setup { ctx =>
-      ctx.log.info("Joiner wants to join")
+      ctx.log.info("NEW JOINER")
       val cluster = Cluster(ctx.system)
       //cluster.manager ! Join(cluster.selfMember.address)
-      ctx.spawn(PlayerBehavior(), "player")
+      //ctx.spawn(PlayerBehavior(), "player")
       Behaviors.stopped
     }
 }

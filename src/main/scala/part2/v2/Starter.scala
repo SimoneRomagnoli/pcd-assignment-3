@@ -13,11 +13,10 @@ object Starter {
   def apply(): Behavior[None] = Behaviors.setup { ctx =>
     val cluster = Cluster(ctx.system);
 
-    ctx.log.debug("SETTING TILES")
-    //cluster.manager ! Join(cluster.selfMember.address);
+    val puzzle:PuzzleBoard = PuzzleBoard(3, 5, starter = true)
+    ctx.log.info("PUZZLE CREATED")
 
-    ctx.spawn(PlayerBehavior(), "player1")
-    // cluster.subscriptions ! Subscribe(subscriber, classOf[ClusterEvent.MemberJoined])
+    ctx.spawn(PlayerBehavior(puzzle), s"player" + (cluster.state.members.size-1))
     Behaviors.stopped
   }
 }

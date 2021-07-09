@@ -5,7 +5,7 @@ import akka.actor.typed.{ActorSystem, Behavior}
 import akka.cluster.typed.Cluster
 import com.typesafe.config.ConfigFactory
 
-object App {
+object SimpleApp {
   object RootBehavior {
     def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
       val cluster = Cluster(ctx.system)
@@ -19,6 +19,7 @@ object App {
       }
       Behaviors.empty
     }
+  }
 
 
     def main(args: Array[String]): Unit = {
@@ -45,5 +46,4 @@ object App {
       ActorSystem[Nothing](RootBehavior(), "ClusterSystem", config)
 
     }
-  }
 }
