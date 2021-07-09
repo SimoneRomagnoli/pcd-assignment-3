@@ -9,7 +9,7 @@ import javax.imageio.ImageIO
 import javax.swing._
 import scala.util.Random
 
-case class PuzzleBoard(rows: Int, cols: Int, imgPath: String, starter:Boolean, currentPositions:List[Int] = List(), var tiles: List[Tile] = List(), selectionManager: SelectionManager = SelectionManager()) extends JFrame {
+case class PuzzleBoard(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var tiles: List[Tile] = List(), selectionManager: SelectionManager = SelectionManager()) extends JFrame {
   setTitle("Puzzle")
   setResizable(false)
   setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -24,6 +24,7 @@ case class PuzzleBoard(rows: Int, cols: Int, imgPath: String, starter:Boolean, c
   this.setVisible(true)
 
   private def createTiles(): Unit = {
+    val imgPath:String = "res/numbers.png"
     val img: BufferedImage = ImageIO.read(new File(imgPath))
     if (img equals null) {
       JOptionPane.showMessageDialog(this, "Could not load image")
@@ -80,5 +81,6 @@ case class PuzzleBoard(rows: Int, cols: Int, imgPath: String, starter:Boolean, c
     if (tiles.forall(t => t.isInRightPlace))
       JOptionPane.showMessageDialog(this, "Puzzle Completed!")
   }
-
 }
+
+case class PuzzleOptions(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int] = List())
