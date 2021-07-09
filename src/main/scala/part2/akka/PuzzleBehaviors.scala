@@ -4,7 +4,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.cluster.typed.Cluster
-import part2.akka.PuzzleBehaviors.Joiner.JoinableString
+import part2.akka.PuzzleBehaviors.Joiner.Joinable
 import part2.akka.PuzzleBehaviors.Messages.Event
 import part2.akka.PuzzleBehaviors.Player.PlayerServiceKey
 import part2.akka.Tiles.Tile
@@ -21,6 +21,8 @@ object PuzzleBehaviors {
       val puzzleBoard = PuzzleBoard(3, 5, imgPath, starter = true)
       val playerId = Cluster(ctx.system).state.members.size
 
+      ctx.log.info(s"tiles is ${puzzleBoard.tiles}")
+
       val child = ctx.spawn(Player(playerId, puzzleBoard), s"player$playerId")
       ctx.log.info(s"Registering myself (${ctx.self.path}) with receptionist")
       ctx.system.receptionist ! Receptionist.Register(PlayerServiceKey, child)
@@ -32,14 +34,15 @@ object PuzzleBehaviors {
   object Joiner {
     val JoinerServiceKey: ServiceKey[Event] = ServiceKey[Event]("joiner")
 
-    final case class JoinableString(id:Int, rows:Int, imgPath:String, currentPositions:List[Int]) extends Event with CborSerializable
+    final case class Joinable(id:Int, rows:Int, imgPath:String, currentPositions:List[Int]) extends Event with CborSerializable
 
     def apply(): Behavior[Event] = Behaviors.setup[Event] { ctx =>
       ctx.system.receptionist ! Receptionist.Register(JoinerServiceKey, ctx.self)
 
       Behaviors.receiveMessage {
-        case JoinableString(id, rows, imgPath, currentPositions) =>
+        case Joinable(id, rows, imgPath, currentPositions) =>
           ctx.log.info(s"------- I AM GOING TO START A NEW BOARD ------------")
+          ctx.log.info(s"current positions are $currentPositions")
           val puzzleBoard = PuzzleBoard(rows, currentPositions.size / rows, imgPath, starter = false, currentPositions = currentPositions)
           val child = ctx.spawn(Player(id, puzzleBoard), s"player$id")
           ctx.log.info(s"Registering myself-joiner (${ctx.self.path}) with receptionist")
@@ -69,9 +72,9 @@ object PuzzleBehaviors {
         case JoinersUpdated(newJoiners) =>
           for(joiner <- newJoiners) {
             if(!joiners.map(j => j.path).contains(joiner.path)) {
-              ctx.log.info(s"new joiner ${joiner.path} is receiving arguments")
-              //joiner ! Joinable(newJoiners.size, puzzleBoard.rows, puzzleBoard.tiles)
-              joiner ! JoinableString(newJoiners.size, puzzleBoard.rows, "res/bletchley-park-mansion.jpg", puzzleBoard.tiles.map(tile => tile.currentPosition))
+              ctx.log.info(s"tiles list is ${puzzleBoard.tiles}")
+              ctx.log.info(s"but if i order it, then it becomes ${puzzleBoard.tiles.sorted((a:Tile, b:Tile) => a.originalPosition-b.originalPosition)}")
+              joiner ! Joinable(newJoiners.size, puzzleBoard.rows, "res/bletchley-park-mansion.jpg", puzzleBoard.tiles.sorted((a:Tile, b:Tile) => a.originalPosition-b.originalPosition).map(tile => tile.currentPosition))
             }
           }
           running(ctx, newJoiners.toIndexedSeq, puzzleBoard)

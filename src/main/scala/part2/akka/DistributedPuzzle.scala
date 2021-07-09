@@ -25,7 +25,7 @@ object DistributedPuzzle {
 
   def main(args:Array[String]): Unit = {
     if(args.isEmpty) {
-      startup(25251)
+      startup(0)
     } else {
       require(args.length == 1, "Usage: port")
       startup(args(0).toInt)
