@@ -6,7 +6,7 @@ scalaVersion := "2.13.6"
 
 resourceDirectory in Compile := baseDirectory.value / "resources"
 
-lazy val akkaVersion = "2.6.14"
+val akkaVersion = "2.6.15"
 
 lazy val osName = System.getProperty("os.name") match {
   case n if n.startsWith("Linux") => "linux"
@@ -24,6 +24,7 @@ libraryDependencies ++= javaFXModules.map( m=>
 libraryDependencies += "org.jfree" % "jfreechart" % "1.0.14"
 
 libraryDependencies ++= Seq(
+  "com.typesafe.akka" %% "akka-cluster-typed" % akkaVersion,
   "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-typed" % akkaVersion,
   "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
