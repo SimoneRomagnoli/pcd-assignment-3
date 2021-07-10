@@ -100,6 +100,7 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
       tile1.selected = false
     }
     paintPuzzle()
+    checkSolution()
   }
 
   def localSelection(selectedPosition:Int, localId:Int): Unit = {
