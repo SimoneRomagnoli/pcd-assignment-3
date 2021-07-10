@@ -11,7 +11,7 @@ import javax.imageio.ImageIO
 import javax.swing._
 import scala.util.Random
 
-case class PuzzleBoard(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var selectionList:List[Int], selectionGuardian:ActorRef[Selection], var tiles: List[Tile] = List(), selectionManager:SelectionManager = SelectionManager()) extends JFrame {
+case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var selectionList:List[Int], selectionGuardian:ActorRef[Selection], var tiles: List[Tile] = List(), selectionManager:SelectionManager = SelectionManager()) extends JFrame {
   setTitle("Puzzle")
   setResizable(false)
   setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -19,14 +19,14 @@ case class PuzzleBoard(rows: Int, cols: Int, starter:Boolean, currentPositions:L
   val board = new JPanel()
   board.setBorder(BorderFactory.createLineBorder(Color.gray))
   board.setLayout(new GridLayout(rows, cols, 0, 0))
-  getContentPane.add(board, BorderLayout.CENTER)
+  getContentPane.add(board,BorderLayout.CENTER)
 
   createTiles()
   paintPuzzle()
   this.setVisible(true)
 
   private def createTiles(): Unit = {
-    val imgPath:String = "res/numbers.png"
+    val imgPath:String = "res/numbers-smaller.png"
     val img: BufferedImage = ImageIO.read(new File(imgPath))
     if (img equals null) {
       JOptionPane.showMessageDialog(this, "Could not load image")
@@ -59,33 +59,61 @@ case class PuzzleBoard(rows: Int, cols: Int, starter:Boolean, currentPositions:L
     }
   }
 
-  private def paintPuzzle(): Unit = {
-    board.removeAll()
-    tiles = tiles.sorted
-
-    for (tile <- tiles) {
-      val btn = TileButton(tile)
-      board.add(btn)
-      btn.setBorder(BorderFactory.createLineBorder(Color.gray))
-      btn.addActionListener(_ => {
-        selectionGuardian ! SelectedCell(tile.currentPosition)
-        selectionManager.selectTile(tile, () => {
-          paintPuzzle()
-          checkSolution()
-        })
-      })
-    }
-
-    pack()
-    setLocationRelativeTo(null)
-  }
-
   private def checkSolution(): Unit = {
     if (tiles.forall(t => t.isInRightPlace))
       JOptionPane.showMessageDialog(this, "Puzzle Completed!")
   }
+
+  def paintPuzzle(): Unit = {
+    board.removeAll()
+    tiles = tiles.sorted
+
+    tiles.zipWithIndex.foreach {
+      case (tile, index) =>
+        val btn = TileButton(DistributedPuzzle.playersToColors(localId),tile)
+        board.add(btn)
+        val color:Color =
+          if(selectionList(index) == 0) Color.gray
+          else DistributedPuzzle.playersToColors(selectionList(index))
+        btn.setBorder(BorderFactory.createLineBorder(color, 3))
+        btn.addActionListener(_ => {
+            selectionGuardian ! SelectedCell(tile.currentPosition)
+        })
+    }
+
+    pack()
+    //setLocationRelativeTo(null)
+  }
+
+  def remoteSelection(selectedPosition:Int, remoteId:Int): Unit = {
+    if(!selectionList.contains(remoteId)) {
+      selectionList = selectionList.patch(selectedPosition, Seq(remoteId), 1)
+    } else {
+      val firstSelection = selectionList.indexOf(remoteId)
+      selectionList = selectionList.patch(firstSelection, Seq(0), 1)
+
+      val tile1:Tile = tiles.filter(tile => tile.currentPosition == firstSelection).head
+      val tile2:Tile = tiles.filter(tile => tile.currentPosition == selectedPosition).head
+      selectionManager.swap(tile1, tile2)
+    }
+    paintPuzzle()
+  }
+
+  def localSelection(selectedPosition:Int, localId:Int): Unit = {
+    if(!selectionList.contains(localId)) {
+      selectionList = selectionList.patch(selectedPosition, Seq(localId), 1)
+    } else {
+      val firstSelection = selectionList.indexOf(localId)
+      selectionList = selectionList.patch(firstSelection, Seq(0), 1)
+    }
+    selectionManager.selectTile(tiles.filter(tile => tile.currentPosition==selectedPosition).head, () => {
+      paintPuzzle()
+      checkSolution()
+    })
+  }
 }
 
 case class PuzzleOptions(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int] = List(), var selectionList:List[Int] = List()) {
-  selectionList = LazyList.continually(0).take(rows * cols).toList
+  if(selectionList.isEmpty)
+    selectionList = LazyList.continually(0).take(rows * cols).toList
 }
