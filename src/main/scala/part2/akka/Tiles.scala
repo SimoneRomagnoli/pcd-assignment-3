@@ -6,7 +6,7 @@ import javax.swing.{BorderFactory, ImageIcon, JButton}
 
 object Tiles {
 
-  case class Tile(image: Image, originalPosition: Int, var currentPosition: Int) extends Comparable[Tile] {
+  case class Tile(image: Image, originalPosition: Int, var currentPosition: Int, var selected:Boolean = false) extends Comparable[Tile] {
     override def compareTo(other: Tile): Int =
       if (currentPosition < other.currentPosition) -1
       else if (currentPosition == other.currentPosition) 0
@@ -21,8 +21,10 @@ object Tiles {
 
   case class TileButton(color:Color, tile: Tile) extends JButton(new ImageIcon(tile.image)) {
     addMouseListener(new MouseAdapter() {
-      override def mouseClicked(e: MouseEvent): Unit =
-        setBorder(BorderFactory.createLineBorder(color, 3))
+      override def mouseClicked(e: MouseEvent): Unit = {
+        if(!tile.selected)
+          setBorder(BorderFactory.createLineBorder(color, 3))
+      }
     })
   }
 

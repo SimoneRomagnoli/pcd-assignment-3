@@ -77,6 +77,7 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
           else DistributedPuzzle.playersToColors(selectionList(index))
         btn.setBorder(BorderFactory.createLineBorder(color, 3))
         btn.addActionListener(_ => {
+          if(selectionList(index) == 0)
             selectionGuardian ! SelectedCell(tile.currentPosition)
         })
     }
@@ -88,6 +89,7 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
   def remoteSelection(selectedPosition:Int, remoteId:Int): Unit = {
     if(!selectionList.contains(remoteId)) {
       selectionList = selectionList.patch(selectedPosition, Seq(remoteId), 1)
+      tiles.filter(tile => tile.currentPosition == selectedPosition).head.selected = true
     } else {
       val firstSelection = selectionList.indexOf(remoteId)
       selectionList = selectionList.patch(firstSelection, Seq(0), 1)
@@ -95,6 +97,7 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
       val tile1:Tile = tiles.filter(tile => tile.currentPosition == firstSelection).head
       val tile2:Tile = tiles.filter(tile => tile.currentPosition == selectedPosition).head
       selectionManager.swap(tile1, tile2)
+      tile1.selected = false
     }
     paintPuzzle()
   }
@@ -102,9 +105,11 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
   def localSelection(selectedPosition:Int, localId:Int): Unit = {
     if(!selectionList.contains(localId)) {
       selectionList = selectionList.patch(selectedPosition, Seq(localId), 1)
+      tiles.filter(tile => tile.currentPosition == selectedPosition).head.selected = true
     } else {
       val firstSelection = selectionList.indexOf(localId)
       selectionList = selectionList.patch(firstSelection, Seq(0), 1)
+      tiles.filter(tile => tile.currentPosition == firstSelection).head.selected = false
     }
     selectionManager.selectTile(tiles.filter(tile => tile.currentPosition==selectedPosition).head, () => {
       paintPuzzle()
