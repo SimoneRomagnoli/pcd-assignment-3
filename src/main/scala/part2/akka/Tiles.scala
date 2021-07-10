@@ -19,10 +19,10 @@ object Tiles {
       currentPosition == originalPosition
   }
 
-  case class TileButton(tile: Tile) extends JButton(new ImageIcon(tile.image)) {
+  case class TileButton(color:Color, tile: Tile) extends JButton(new ImageIcon(tile.image)) {
     addMouseListener(new MouseAdapter() {
       override def mouseClicked(e: MouseEvent): Unit =
-        setBorder(BorderFactory.createLineBorder(Color.red))
+        setBorder(BorderFactory.createLineBorder(color, 3))
     })
   }
 

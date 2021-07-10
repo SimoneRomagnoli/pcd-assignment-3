@@ -6,7 +6,15 @@ import akka.cluster.typed.Cluster
 import com.typesafe.config.ConfigFactory
 import part2.akka.PuzzleBehaviors.{Joiner, Starter}
 
+import java.awt.Color
+
 object DistributedPuzzle {
+  val playersToColors: Map[Int, Color] =
+    Map(
+      (1, Color.green), (2, Color.blue), (3, Color.red),
+      (4, Color.orange), (5, Color.magenta), (6, Color.yellow),
+      (7, Color.cyan), (8, Color.pink), (9, Color.darkGray)
+    )
 
   object RootBehavior {
     def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
