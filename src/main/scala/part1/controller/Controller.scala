@@ -8,8 +8,7 @@ import java.io.File
 
 case class Controller(view: View) extends InputListener {
   var wordCounter: WordCounter = WordCounter(this)
-  val stopFlag:Flag= new Flag()
-
+  val stopFlag:Flag = new Flag()
 
   override def started(dir: File, wordsFile: File, limitWords: Int): Unit = {
     wordCounter = WordCounter(this)
@@ -18,10 +17,15 @@ case class Controller(view: View) extends InputListener {
   }
 
   override def stopped(): Unit = {
-    stopFlag.set();
+    wordCounter.stop()
+    stopFlag.set()
   }
 
   def update(words: Int, map: Map[String, Integer]): Unit = {
     view.update(words, map.asJava)
+  }
+
+  def done():Unit = {
+    view.done()
   }
 }
