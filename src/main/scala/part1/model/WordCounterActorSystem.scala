@@ -11,6 +11,10 @@ import java.nio.file.{Files, Paths}
 import java.util.Scanner
 import part1.model.Messages._
 
+/**
+ * Object containing messages of the actor system.
+ *
+ */
 object Messages {
   sealed trait Input
   final case class Parameters(directoryPath:String, file:File, limit:Int) extends Input
@@ -23,6 +27,12 @@ object Messages {
   final case class Occurrences(occurrences: Map[String, Int], words:Int, title:String) extends Output
 }
 
+/**
+ * Extractor behavior:
+ *    extracts pdf documents from a directory
+ *    and sends them to the next actor.
+ *
+ */
 object Extractor {
   def apply(stripper:ActorRef[Pdf], gatherer:ActorRef[Output]): Behavior[Directory] = Behaviors.receive { (ctx, msg) =>
     ctx.log.info(s"Received message $msg")
@@ -47,6 +57,12 @@ object Valid {
   def unapply(directory:File): Option[File] = if(directory.exists() && directory.isDirectory) Some(directory) else None
 }
 
+/**
+ * Stripper behavior:
+ *    spawns a stripper-child
+ *    and turns back to listening.
+ *
+ */
 object Stripper {
   def apply(counter:ActorRef[Text]): Behavior[Pdf] = {
     Behaviors.receive { (ctx, msg) =>
@@ -58,6 +74,12 @@ object Stripper {
   }
 }
 
+/**
+ * StripperChild behavior:
+ *    strips a pdf document
+ *    and sends its text to the next actor.
+ *
+ */
 object StripperChild {
   def apply(counter:ActorRef[Text]): Behavior[Pdf] = Behaviors.receive { (ctx, msg) =>
     ctx.log.info(s"Start stripping document ${msg.title}")
@@ -75,6 +97,13 @@ object StripperChild {
   }
 }
 
+/**
+ * Counter behavior:
+ *    splits words in a text, filters them and counts occurrences for each word,
+ *    sends the occurrences to the next actor
+ *    and turns back to listening.
+ *
+ */
 object Counter {
   val REGEX = "[^a-zA-Z0-9]"
 
@@ -93,6 +122,13 @@ object Counter {
   }
 }
 
+/**
+ * Gatherer behavior:
+ *    gathers occurrences from the counter actor,
+ *    updates the gui
+ *    and turns back to listening.
+ *
+ */
 object Gatherer {
   var globalOccurrences:Map[String, Int] = Map()
   var elaboratedWords:Int = 0
@@ -134,6 +170,12 @@ object Gatherer {
   }
 }
 
+/**
+ * Class containing the Actor System of the application.
+ * Receives input messages from the user interface (START and STOP buttons).
+ *
+ * @param controller the application controller, needed to update the gui
+ */
 case class WordCounter(controller: Controller) {
   val system:ActorSystem[Input] = ActorSystem[Input](Behaviors.setup { ctx =>
     Behaviors.receiveMessage[Input] {
