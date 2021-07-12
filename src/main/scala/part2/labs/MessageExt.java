@@ -1,4 +1,4 @@
-package rmi;
+package part2.rmi;
 
 public class MessageExt extends Message {
 

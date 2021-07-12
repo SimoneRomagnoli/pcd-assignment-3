@@ -1,4 +1,4 @@
-package rmi;
+package part2.rmi;
 
 public class MyClass1Impl implements java.io.Serializable, MyClass1  {
 

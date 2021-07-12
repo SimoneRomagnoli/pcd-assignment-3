@@ -1,4 +1,4 @@
-package rmi;
+package part2.rmi;
 
 import java.io.Serializable;
 

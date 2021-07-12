@@ -1,6 +1,4 @@
-package rmi;
-
-import java.rmi.*;
+package part2.rmi;
 
 public interface MyClass1 {
 

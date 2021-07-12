@@ -1,8 +1,7 @@
-package rmi;
+package part2.rmi;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 
 public class Test01_Client1b {
 
