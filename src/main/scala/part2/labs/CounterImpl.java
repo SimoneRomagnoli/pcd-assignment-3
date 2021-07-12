@@ -1,4 +1,4 @@
-package part2.rmi;
+package part2.labs;
 
 public class CounterImpl implements Counter {
 	private int value;
