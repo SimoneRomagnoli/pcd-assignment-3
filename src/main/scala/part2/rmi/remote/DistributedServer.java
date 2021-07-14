@@ -1,19 +1,15 @@
-package part2.rmi;
+package part2.rmi.remote;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.stream.Collectors;
 
 public class DistributedServer {
 
     public static final String HOSTLIST = "hostlist";
 
-    public DistributedServer(Host localhost) {
+    public DistributedServer(RemoteHostImpl localhost) {
         try {
             HostList hostList = new HostListImpl();
             hostList.join(localhost);
@@ -31,7 +27,8 @@ public class DistributedServer {
     public DistributedServer(String remotehost) {
         try {
             HostList hostList = (HostList) LocateRegistry.getRegistry(remotehost).lookup(HOSTLIST);
-            Host localhost = new Host(hostList.getHostList().size());
+            RemoteHostImpl localhost = new RemoteHostImpl(hostList.getHostList().size());
+
             hostList.join(localhost);
 
             HostList newHostList = new HostListImpl(hostList);
@@ -39,6 +36,7 @@ public class DistributedServer {
 
             // Bind the remote object's stub in the registry
             LocateRegistry.getRegistry().rebind(HOSTLIST, hostListStub);
+
 
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();

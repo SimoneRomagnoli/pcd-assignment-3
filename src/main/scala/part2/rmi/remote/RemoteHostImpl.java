@@ -1,15 +1,15 @@
-package part2.rmi;
+package part2.rmi.remote;
 
 import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 
-public class Host implements Serializable {
+public class RemoteHostImpl implements RemoteHost, Serializable {
 
     private String address;
     private int id;
 
-    public Host(int id) {
+    public RemoteHostImpl(int id) {
         try {
             this.address = Inet4Address.getLocalHost().getHostAddress();
             this.id = id;
@@ -18,7 +18,7 @@ public class Host implements Serializable {
         }
     }
 
-    public Host() {
+    public RemoteHostImpl() {
         try {
             this.address = Inet4Address.getLocalHost().getHostAddress();
             this.id = 0;
@@ -27,14 +27,17 @@ public class Host implements Serializable {
         }
     }
 
+    @Override
     public String getAddress() {
         return this.address;
     }
 
+    @Override
     public int getId() {
         return this.id;
     }
 
+    @Override
     public String toString() {
         return this.address + ":" + this.id;
     }

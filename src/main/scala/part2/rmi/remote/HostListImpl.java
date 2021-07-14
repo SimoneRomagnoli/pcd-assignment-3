@@ -1,4 +1,4 @@
-package part2.rmi;
+package part2.rmi.remote;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -6,7 +6,7 @@ import java.util.List;
 
 public class HostListImpl implements HostList {
 
-    private List<Host> hostList;
+    private List<RemoteHost> hostList;
 
     public HostListImpl() {
         this.hostList = new ArrayList<>();
@@ -21,12 +21,14 @@ public class HostListImpl implements HostList {
     }
 
     @Override
-    public List<Host> getHostList() throws RemoteException {
+    public List<RemoteHost> getHostList() throws RemoteException {
         return this.hostList;
     }
 
     @Override
-    public synchronized void join(Host host) throws RemoteException {
+    public synchronized void join(RemoteHostImpl host) throws RemoteException {
+        System.out.println("A new host has joined: "+host.toString());
         hostList.add(host);
+        System.out.println("Now host list is: "+this.hostList.toString());
     }
 }

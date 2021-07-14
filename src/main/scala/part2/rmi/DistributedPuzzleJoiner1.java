@@ -1,5 +1,7 @@
 package part2.rmi;
 
+import part2.rmi.remote.DistributedServer;
+
 public class DistributedPuzzleJoiner1 {
 
     public static void main(String[] args) {
