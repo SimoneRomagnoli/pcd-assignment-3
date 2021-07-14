@@ -3,6 +3,7 @@ package part2.rmi.remote;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class DistributedServer {
@@ -26,7 +27,11 @@ public class DistributedServer {
 
     public DistributedServer(String remotehost) {
         try {
-            HostList hostList = (HostList) LocateRegistry.getRegistry(remotehost).lookup(HOSTLIST);
+            System.out.println("Reaching out to "+remotehost);
+            Registry registry = LocateRegistry.getRegistry(remotehost, 0);
+            System.out.println("I received a registry from Matteo");
+            HostList hostList = (HostList) LocateRegistry.getRegistry(remotehost, 0).lookup(HOSTLIST);
+            System.out.println("I received a hostlist: "+hostList.getHostList().toString());
             RemoteHostImpl localhost = new RemoteHostImpl(hostList.getHostList().size());
 
             hostList.join(localhost);
