@@ -29,7 +29,7 @@ public class SimpleGUIMain {
 
             //JOIN THE HOST LIST
             HostList remoteHL = (HostList)registry.lookup("hostlist");
-            RemoteHost localhost = new RemoteHostImpl();
+            RemoteHost localhost = new RemoteHostImpl(0);
             remoteHL.join(localhost);
 
             System.out.println("Objects registered.");

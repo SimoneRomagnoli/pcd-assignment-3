@@ -32,7 +32,11 @@ public class SimpleGUI extends JFrame {
         }
 
         this.btn.addActionListener(al -> {
-            this.controller.inc();
+            try {
+                this.controller.inc();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             //btn.setText(String.valueOf(controller.getValue()));
         });
 

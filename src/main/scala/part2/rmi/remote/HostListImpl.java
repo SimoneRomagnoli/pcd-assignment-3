@@ -3,6 +3,7 @@ package part2.rmi.remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HostListImpl implements HostList {
 
@@ -30,5 +31,14 @@ public class HostListImpl implements HostList {
         System.out.println("A new host has joined: "+host.toString());
         hostList.add(host);
         System.out.println("Now host list is: "+this.hostList.toString());
+    }
+
+    @Override
+    public void drop(List<Integer> ids) throws RemoteException {
+        hostList.forEach(h -> {
+            if(ids.contains(h.getId())) {
+                h.setUnreachable();
+            }
+        });
     }
 }

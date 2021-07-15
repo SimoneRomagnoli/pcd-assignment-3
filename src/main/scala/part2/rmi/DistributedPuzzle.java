@@ -7,7 +7,7 @@ public class DistributedPuzzle {
 
     public static void main(String[] args) {
         if(args.length < 1) {
-            final RemoteHostImpl localhost = new RemoteHostImpl();
+            final RemoteHostImpl localhost = new RemoteHostImpl(0);
             final DistributedServer distributedServer = new DistributedServer(localhost);
             //final Client client = new Client();
         } else {
