@@ -4,7 +4,10 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class DistributedServer {
 
@@ -19,6 +22,19 @@ public class DistributedServer {
             // Bind the remote object's stub in the registry
             LocateRegistry.getRegistry().rebind(HOSTLIST, hostListStub);
 
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        HostList l = (HostList) LocateRegistry.getRegistry().lookup(HOSTLIST);
+                        System.out.println("My hostlist is: "+l.getHostList().toString());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            },0,5000);
+
             System.out.println("I created a new hostlist");
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -28,8 +44,6 @@ public class DistributedServer {
     public DistributedServer(String remotehost) {
         try {
             System.out.println("Reaching out to "+remotehost);
-            Registry registry = LocateRegistry.getRegistry(remotehost, 0);
-            System.out.println("I received a registry from Matteo");
             HostList hostList = (HostList) LocateRegistry.getRegistry(remotehost, 0).lookup(HOSTLIST);
             System.out.println("I received a hostlist: "+hostList.getHostList().toString());
             RemoteHostImpl localhost = new RemoteHostImpl(hostList.getHostList().size());
@@ -41,6 +55,19 @@ public class DistributedServer {
 
             // Bind the remote object's stub in the registry
             LocateRegistry.getRegistry().rebind(HOSTLIST, hostListStub);
+
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        HostList l = (HostList) LocateRegistry.getRegistry().lookup(HOSTLIST);
+                        System.out.println("My hostlist is: "+l.getHostList().toString());
+                    } catch (RemoteException | NotBoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+            },0,5000);
 
 
         } catch (RemoteException | NotBoundException e) {

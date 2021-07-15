@@ -26,7 +26,7 @@ public class HostListImpl implements HostList {
     }
 
     @Override
-    public synchronized void join(RemoteHostImpl host) throws RemoteException {
+    public synchronized void join(RemoteHost host) throws RemoteException {
         System.out.println("A new host has joined: "+host.toString());
         hostList.add(host);
         System.out.println("Now host list is: "+this.hostList.toString());
