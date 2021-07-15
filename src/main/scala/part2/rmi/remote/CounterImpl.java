@@ -19,7 +19,7 @@ public class CounterImpl implements Counter {
 		System.out.println("INC. I will update observables "+this.observables.toString());
 		for(RemoteObservable o: this.observables) {
 			try {
-				o.update(value);
+				o.update();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}

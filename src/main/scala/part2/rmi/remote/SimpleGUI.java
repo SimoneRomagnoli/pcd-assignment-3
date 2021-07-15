@@ -2,71 +2,55 @@ package part2.rmi.remote;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.Serializable;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public class SimpleGUI extends JFrame implements Serializable {
+public class SimpleGUI extends JFrame {
 
     private JPanel panel;
     private int id;
-    private Counter counter;
+    private JButton btn;
+    private Controller controller;
 
-    public SimpleGUI(int id, Counter counter) {
-        setTitle("i am id "+id);
+    public SimpleGUI(int id, Controller controller) {
+        this.id = id;
+        this.controller = controller;
+        setTitle("JFrame "+id);
         setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.panel = new JPanel();
+        this.panel.setBorder(BorderFactory.createLineBorder(Color.gray));
+        this.panel.setLayout(new FlowLayout());
+        getContentPane().add(this.panel, BorderLayout.CENTER);
 
-        this.id = id;
-        this.counter = counter;
-
-        panel = new JPanel();
-        panel.setBorder(BorderFactory.createLineBorder(Color.gray));
-        panel.setLayout(new FlowLayout());
-        getContentPane().add(panel, BorderLayout.CENTER);
-
-        drawButton(0);
-
-        setVisible(true);
-        pack();
-
-    }
-
-    private void drawButton(int value) {
-        JButton btn = new JButton();
         try {
-            System.out.println("In drawing button i got counter "+value+" while my value is "+counter.getValue());
-            btn.setText(String.valueOf(counter.getValue()));
+            this.btn = new JButton(String.valueOf(controller.getValue()));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
 
-        btn.addActionListener(al -> {
-            try {
-                /*
-                HostList hl = (HostList) LocateRegistry.getRegistry(1099+id).lookup("hostlist");
-                for(RemoteHost host: hl.getHostList()) {
-                    Registry registry = LocateRegistry.getRegistry(1099+host.getId());
-                    Counter counter = (Counter) registry.lookup("countObj");
-                    counter.inc();
-                }
-
-                 */
-                //btn.setText(String.valueOf(counter.getValue()));
-                this.counter.inc();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
+        this.btn.addActionListener(al -> {
+            this.controller.inc();
+            //btn.setText(String.valueOf(controller.getValue()));
         });
-        panel.add(btn);
+
+        this.panel.add(this.btn);
+        setVisible(true);
+        pack();
     }
 
-    public void updateVal(int value) {
-        SwingUtilities.invokeLater(() -> {
-            this.panel.removeAll();
-            this.drawButton(value);
-        });
+    private void drawButton() {
+        try {
+            System.out.println("In drawing button i got counter "+this.controller.getValue());
+            btn.setText(String.valueOf(this.controller.getValue()));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateVal() {
+        SwingUtilities.invokeLater(this::drawButton);
     }
 }
