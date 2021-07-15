@@ -35,7 +35,7 @@ public class Joiner2 {
             Counter localCounterStub = (Counter) UnicastRemoteObject.exportObject(localCounter, 0);
             LocateRegistry.getRegistry(Starter.REGISTRY_PORT+id).rebind("countObj", localCounterStub);
 
-            Controller controller = new Controller(id, localCounter, localHostList);
+            //Controller controller = new Controller(id, localCounter, localHostList);
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }

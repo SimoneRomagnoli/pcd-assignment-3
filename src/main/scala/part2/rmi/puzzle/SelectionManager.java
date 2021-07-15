@@ -6,7 +6,6 @@ public class SelectionManager {
 	private Tile selectedTile;
 
 	public void selectTile(final Tile tile, final Listener listener) {
-		
 		if(selectionActive) {
 			selectionActive = false;
 			

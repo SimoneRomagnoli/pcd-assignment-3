@@ -1,7 +1,9 @@
 package part2.rmi.controller;
 
-import part2.rmi.puzzle.SimpleGUI;
+import part2.rmi.puzzle.PuzzleBoard;
 import part2.rmi.remotes.*;
+
+import java.util.List;
 
 import java.rmi.RemoteException;
 
@@ -9,23 +11,28 @@ import java.rmi.RemoteException;
 public class Controller {
 
     private final Propagator propagator;
-    private final SimpleGUI gui;
-    private final Counter localCounter;
-    private final HostList hostList;
     private final LocalObserver observer;
+
+    private final PuzzleBoard puzzleBoard;
+
+    private final BoardStatus boardStatus;
+    private final HostList hostList;
+
     private int id;
 
-    public Controller(int id, Counter counter, HostList hl) {
+    public Controller(int id, BoardStatus boardStatus, HostList hl) {
         this.id = id;
-        this.localCounter = counter;
+        this.boardStatus = boardStatus;
         this.hostList = hl;
-        this.gui = new SimpleGUI(this.id, this);
+
+        this.puzzleBoard = new PuzzleBoard(this, id == 1);
+        this.puzzleBoard.setVisible(true);
         this.observer = new LocalObserver(this);
-        this.propagator = new Propagator(id, this.hostList, this.localCounter);
+        this.propagator = new Propagator(id, this.hostList, this.boardStatus);
 
         try {
-            this.localCounter.setPropagator(this.propagator);
-            this.localCounter.setLocalObserver(this.observer);
+            this.boardStatus.setPropagator(this.propagator);
+            this.boardStatus.setLocalObserver(this.observer);
 
             this.hostList.setPropagator(this.propagator);
 
@@ -37,16 +44,27 @@ public class Controller {
         }
     }
 
-    public int getValue() throws RemoteException {
-        return this.localCounter.getValue();
+    public List<Integer> getSelectedList() throws RemoteException {
+        return this.boardStatus.getSelectedList();
     }
 
-    public void inc() throws RemoteException {
-        this.localCounter.inc();
+    public List<Integer> getCurrentPositions() throws RemoteException {
+        return this.boardStatus.getCurrentPositions();
+    }
+
+    public void select(int index) throws RemoteException {
+        this.boardStatus.select(index, this.id);
     }
 
     public void update() {
-        this.gui.updateVal();
+        this.puzzleBoard.updateBoard();
     }
 
+    public void loadCurrentPositions(List<Integer> currentPositions) {
+        try {
+            this.boardStatus.loadCurrentPositions(currentPositions);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 }
