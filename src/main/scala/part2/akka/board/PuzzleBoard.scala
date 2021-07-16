@@ -1,8 +1,9 @@
-package part2.akka
+package part2.akka.board
 
 import akka.actor.typed.ActorRef
-import part2.akka.PuzzleBehaviors.SelectionGuardian.{SelectedCell, Selection}
-import part2.akka.Tiles.{SelectionManager, Tile, TileButton}
+import part2.akka.actors.PuzzleBehaviors.SelectionGuardian.{SelectedCell, Selection}
+import Tiles.{SelectionManager, Tile, TileButton}
+import part2.akka.StarterMain
 
 import java.awt.image.{BufferedImage, CropImageFilter, FilteredImageSource}
 import java.awt.{BorderLayout, Color, GridLayout, Image}
@@ -70,11 +71,11 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
 
     tiles.zipWithIndex.foreach {
       case (tile, index) =>
-        val btn = TileButton(DistributedPuzzle.playersToColors(localId),tile)
+        val btn = TileButton(StarterMain.playersToColors(localId),tile)
         board.add(btn)
         val color:Color =
           if(selectionList(index) == 0) Color.gray
-          else DistributedPuzzle.playersToColors(selectionList(index))
+          else StarterMain.playersToColors(selectionList(index))
         btn.setBorder(BorderFactory.createLineBorder(color, 3))
         btn.addActionListener(_ => {
           if(selectionList(index) == 0)

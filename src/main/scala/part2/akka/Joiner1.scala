@@ -1,14 +1,14 @@
 package part2.akka
 
-import akka.actor.typed.{ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ActorSystem, Behavior}
 import akka.cluster.typed.Cluster
 import com.typesafe.config.ConfigFactory
-import part2.akka.PuzzleBehaviors.{Joiner, Starter}
+import part2.akka.actors.PuzzleBehaviors.{Joiner, Starter}
 
 import java.awt.Color
 
-object DistributedPuzzle {
+object Joiner1 {
   val playersToColors: Map[Int, Color] =
     Map(
       (1, Color.green), (2, Color.blue), (3, Color.red),

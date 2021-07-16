@@ -1,0 +1,5 @@
+1. sistemare la versione ad attori (codice e architettura)
+2. implementare cut del sistema (akka e rmi)
+3. implementare gestione delle failure (akka)
+4. rifattorizzare codice (akka e rmi)
+5. relazione (akka e rmi)
