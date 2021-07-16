@@ -1,20 +1,15 @@
 package part2.rmi.puzzle;
 
-import jnr.ffi.annotations.In;
 import part2.rmi.Starter;
 import part2.rmi.controller.Controller;
 
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -48,44 +43,29 @@ public class PuzzleBoard extends JFrame {
         this.controller = controller;
         this.setTitle("Puzzle");
         this.setResizable(false);
-        this.setDefaultCloseOperation(3);
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.board = new JPanel();
         board.setBorder(BorderFactory.createLineBorder(Color.gray));
         board.setLayout(new GridLayout(rows, cols, 0, 0));
         this.getContentPane().add(board, "Center");
         this.createTiles();
-        this.paintPuzzle();
     }
 
     private void createTiles(){
         BufferedImage image;
         try {
             image = ImageIO.read(new File(this.img));
-        } catch (IOException var10) {
-            System.out.println(var10);
-            JOptionPane.showMessageDialog(this, "Could not load image", "Error", 0);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Could not load image", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        int imageWidth = image.getWidth((ImageObserver)null);
-        int imageHeight = image.getHeight((ImageObserver)null);
+        int imageWidth = image.getWidth();
+        int imageHeight = image.getHeight();
         int position = 0;
-        List<Integer> randomPositions = new ArrayList();
-
-        if(starter){
-            final List<Integer> randomGenerator = new ArrayList<>();
-            IntStream.range(0, this.rows * this.cols).forEach((item) -> {
-                randomGenerator.add(item);
-            });
-            randomPositions = new ArrayList<>(randomGenerator);
-            Collections.shuffle(randomPositions);
-        }else{
-            try {
-                randomPositions = controller.getSerializableTiles().stream().map(SerializableTile::getCurrentPosition).collect(Collectors.toList());
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
+        List<Integer> randomPositions = new ArrayList<>();
+        IntStream.range(0, this.rows * this.cols).forEach(randomPositions::add);
+        Collections.shuffle(randomPositions);
 
         for(int i = 0; i < this.rows; ++i) {
             for(int j = 0; j < this.cols; ++j) {
@@ -95,9 +75,15 @@ public class PuzzleBoard extends JFrame {
             }
         }
 
-        //Solo se sono lo starter devo dire comunicare al BoardStatus l'initial board
         if(starter){
+            this.paintPuzzle();
             controller.loadInitialBoard(this.getSerializableTiles());
+        } else {
+            try {
+                this.updateBoard();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -109,13 +95,12 @@ public class PuzzleBoard extends JFrame {
             TileButton btn = new TileButton(tile);
             this.board.add(btn);
             final int id = tile.getSelection();
-            btn.setBorder(BorderFactory.createLineBorder(id == 0 ? Color.GRAY : COLORS.get(id)));
+            btn.setBorder(BorderFactory.createLineBorder(id == 0 ? Color.GRAY : COLORS.get(id), 3));
             btn.addActionListener((actionListener) -> {
                 // Solo se la tile non è già selezionata
                 if(!tile.alreadySelected()){
                     try {
                         this.controller.select(tile.getSerializableTile());
-                        this.checkSolution();
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -123,22 +108,31 @@ public class PuzzleBoard extends JFrame {
             });
         });
         this.pack();
-        this.setLocationRelativeTo((Component)null);
     }
 
     private void checkSolution() {
         if (this.tiles.stream().allMatch(Tile::isInRightPlace)) {
-            JOptionPane.showMessageDialog(this, "Puzzle Completed!", "", 1);
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Puzzle Completed!", "", JOptionPane.INFORMATION_MESSAGE));
         }
 
     }
+
     public void updateBoard() throws RemoteException {
         List<SerializableTile> serializableTiles = controller.getSerializableTiles();
-        for(int i=0;i<serializableTiles.size();i++){
-            tiles.get(i).setCurrentPosition(serializableTiles.get(i).getCurrentPosition());
-            tiles.get(i).select(serializableTiles.get(i).getSelection());
+
+        for(Tile tile: this.tiles) {
+            final SerializableTile twinTile = serializableTiles
+                    .stream()
+                    .filter(t -> t.getOriginalPosition() == tile.getOriginalPosition())
+                    .collect(Collectors.toList())
+                    .get(0);
+
+            tile.setCurrentPosition(twinTile.getCurrentPosition());
+            tile.select(twinTile.getSelection());
         }
+
         paintPuzzle();
+        checkSolution();
     }
 
     public List<SerializableTile> getSerializableTiles(){

@@ -5,6 +5,7 @@ import part2.rmi.puzzle.SerializableTile;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,7 @@ public class BoardStatusImpl implements BoardStatus {
                     .get(0)
                     .select(this.id);
         }
+        Collections.sort(this.tiles);
         this.propagator.propagate();
         this.observer.update();
     }

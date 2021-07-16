@@ -3,7 +3,7 @@ package part2.rmi.puzzle;
 import java.awt.Image;
 
 class Tile extends SerializableTile{
-	private Image image;
+	private final Image image;
 
     public Tile(Image imagePortion, int position, int integer, int selectBy ) {
         super(position, integer, selectBy);

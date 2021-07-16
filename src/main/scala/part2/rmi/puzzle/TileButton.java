@@ -1,14 +1,11 @@
 package part2.rmi.puzzle;
 
-import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
-@SuppressWarnings("serial")
 public class TileButton extends JButton{
 
 	public TileButton(final Tile tile) {
@@ -17,7 +14,7 @@ public class TileButton extends JButton{
 		addMouseListener(new MouseAdapter() {            
             @Override
             public void mouseClicked(MouseEvent e) {
-            	setBorder(BorderFactory.createLineBorder(Color.red));
+            	//setBorder(BorderFactory.createLineBorder(Color.red));
             }
         });
 	}

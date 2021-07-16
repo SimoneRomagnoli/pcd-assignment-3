@@ -1,11 +1,10 @@
 package part2.rmi.puzzle;
 
-import java.awt.*;
 import java.io.Serializable;
 
 public class SerializableTile implements Comparable<SerializableTile>, Serializable {
 
-    private int originalPosition;
+    private final int originalPosition;
     private int currentPosition;
     private int selectedBy;
 
@@ -47,5 +46,10 @@ public class SerializableTile implements Comparable<SerializableTile>, Serializa
 
     public int compareTo(SerializableTile other) {
         return this.currentPosition < other.currentPosition ? -1 : (this.currentPosition == other.currentPosition ? 0 : 1);
+    }
+
+    @Override
+    public String toString() {
+        return "[ORI: "+originalPosition+", CUR: "+currentPosition+", SEL: "+selectedBy+"]";
     }
 }

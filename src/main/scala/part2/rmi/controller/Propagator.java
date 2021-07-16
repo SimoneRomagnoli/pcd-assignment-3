@@ -1,7 +1,6 @@
 package part2.rmi.controller;
 
 import part2.rmi.remotes.BoardStatus;
-import part2.rmi.remotes.Counter;
 import part2.rmi.remotes.HostList;
 import part2.rmi.remotes.RemoteHost;
 
@@ -37,7 +36,8 @@ public class Propagator implements Serializable {
         for (RemoteHost host : reachableHosts) {
             if(host.getId() != this.id) {
                 try {
-                    Registry registry = LocateRegistry.getRegistry(BASE_PORT + host.getId());
+                    final int port = BASE_PORT + host.getId();
+                    Registry registry = LocateRegistry.getRegistry(port);
 
                     //PROPAGATE BOARD
                     BoardStatus remoteBoardStatus = (BoardStatus) registry.lookup(BOARD);
@@ -68,12 +68,15 @@ public class Propagator implements Serializable {
 
     private void flagUnreachableHosts(List<RemoteHost> hosts) {
         for (RemoteHost host : hosts.stream().filter(RemoteHost::isReachable).collect(Collectors.toList())) {
-            try {
-                LocateRegistry.getRegistry(BASE_PORT + host.getId()).lookup(HOST_LIST);
-            } catch (RemoteException | NotBoundException e) {
-                System.out.println("Could not reach node " + host.getId());
-                System.out.println("Removing the node from distributed host list");
-                host.setUnreachable();
+            if(host.getId() != this.id) {
+                try {
+                    final int port = BASE_PORT + host.getId();
+                    LocateRegistry.getRegistry(port).lookup(HOST_LIST);
+                } catch (RemoteException | NotBoundException e) {
+                    System.out.println("Could not reach node " + host.getId() + " that has port "+ (BASE_PORT+host.getId()));
+                    System.out.println("Removing the node from distributed host list");
+                    host.setUnreachable();
+                }
             }
         }
     }

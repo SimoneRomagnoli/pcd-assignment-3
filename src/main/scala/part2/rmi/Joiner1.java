@@ -23,18 +23,20 @@ public class Joiner1 {
             final int id = remoteHostList.getHostList().size()+1;
 
             //CREATE LOCAL REGISTRY
-            LocateRegistry.createRegistry(Starter.REGISTRY_PORT + id);
+            final int port = Starter.REGISTRY_PORT + id - 1;
+            System.out.println("Starting with port "+port);
+            LocateRegistry.createRegistry(port);
 
             //CREATE OWN HOST LIST
             HostList localHostList = new HostListImpl(remoteHostList);
             HostList localHostListStub = (HostList) UnicastRemoteObject.exportObject(localHostList, 0);
-            LocateRegistry.getRegistry(Starter.REGISTRY_PORT+id).rebind("hostlist", localHostListStub);
+            LocateRegistry.getRegistry(port).rebind("hostlist", localHostListStub);
 
             //CREATE OWN MODEL
             BoardStatus remoteBoard = (BoardStatus) LocateRegistry.getRegistry(Starter.REGISTRY_PORT).lookup("boardStatus");
             BoardStatus localBoard = new BoardStatusImpl(remoteBoard.getTiles(), id);
             BoardStatus localBoardStub = (BoardStatus) UnicastRemoteObject.exportObject(localBoard, 0);
-            LocateRegistry.getRegistry(Starter.REGISTRY_PORT+id).rebind("boardStatus", localBoardStub);
+            LocateRegistry.getRegistry(port).rebind("boardStatus", localBoardStub);
 
             Controller controller = new Controller(id, localBoard, localHostList);
         } catch (RemoteException | NotBoundException e) {
