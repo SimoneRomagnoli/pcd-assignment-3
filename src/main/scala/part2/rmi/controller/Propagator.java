@@ -41,7 +41,7 @@ public class Propagator implements Serializable {
 
                     //PROPAGATE BOARD
                     BoardStatus remoteBoardStatus = (BoardStatus) registry.lookup(BOARD);
-                    remoteBoardStatus.remoteUpdate(board.getSelectedList(), board.getCurrentPositions());
+                    remoteBoardStatus.remoteUpdate(board.getTiles());
 
                     //PROPAGATE HOST LIST
                     HostList remoteHostlist = (HostList) registry.lookup(HOST_LIST);

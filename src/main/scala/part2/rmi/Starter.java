@@ -3,6 +3,7 @@ package part2.rmi;
 
 import part2.rmi.controller.Controller;
 import part2.rmi.puzzle.PuzzleBoard;
+import part2.rmi.puzzle.SerializableTile;
 import part2.rmi.remotes.*;
 
 import java.util.List;
@@ -31,8 +32,8 @@ public class Starter {
             HostList hlStub = (HostList) UnicastRemoteObject.exportObject(hl,0);
 
             //CREATE THE MODEL
-            List<Integer> emptyList = Stream.generate(() -> 0).limit(ROWS*COLS).collect(Collectors.toList());
-            BoardStatus board = new BoardStatusImpl(emptyList, emptyList);
+            List<SerializableTile> emptyList = Stream.generate(() -> new SerializableTile(0,0, 0)).limit(ROWS*COLS).collect(Collectors.toList());
+            BoardStatus board = new BoardStatusImpl(emptyList, 1);
             BoardStatus boardStub = (BoardStatus) UnicastRemoteObject.exportObject(board, 0);
 
             // Bind the remote object's stub in the registry

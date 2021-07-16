@@ -1,5 +1,6 @@
 package part2.rmi.puzzle;
 
+import jnr.ffi.annotations.In;
 import part2.rmi.Starter;
 import part2.rmi.controller.Controller;
 
@@ -9,17 +10,16 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,9 +32,7 @@ public class PuzzleBoard extends JFrame {
             );
 
 
-    final JPanel board;
-
-	final int rows = Starter.ROWS;
+    final int rows = Starter.ROWS;
 	final int cols = Starter.COLS;
 	final String img = Starter.IMG;
 
@@ -43,134 +41,107 @@ public class PuzzleBoard extends JFrame {
     private final Controller controller;
 
     private final List<Tile> tiles = new ArrayList<>();
-	
+    private final JPanel board;
+
     public PuzzleBoard(Controller controller, boolean starter) {
-    	setTitle("Puzzle");
-        setResizable(false);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        this.controller = controller;
         this.starter = starter;
-
+        this.controller = controller;
+        this.setTitle("Puzzle");
+        this.setResizable(false);
+        this.setDefaultCloseOperation(3);
         this.board = new JPanel();
         board.setBorder(BorderFactory.createLineBorder(Color.gray));
         board.setLayout(new GridLayout(rows, cols, 0, 0));
-        getContentPane().add(board, BorderLayout.CENTER);
-
-        createTiles();
-
-        try {
-            paintPuzzle();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        this.getContentPane().add(board, "Center");
+        this.createTiles();
+        this.paintPuzzle();
     }
-    
-    private void createTiles() {
-		final BufferedImage image;
-        
+
+    private void createTiles(){
+        BufferedImage image;
         try {
-            image = ImageIO.read(new File(img));
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Could not load image", "Error", JOptionPane.ERROR_MESSAGE);
+            image = ImageIO.read(new File(this.img));
+        } catch (IOException var10) {
+            System.out.println(var10);
+            JOptionPane.showMessageDialog(this, "Could not load image", "Error", 0);
             return;
         }
 
-        final int imageWidth = image.getWidth(null);
-        final int imageHeight = image.getHeight(null);
-
+        int imageWidth = image.getWidth((ImageObserver)null);
+        int imageHeight = image.getHeight((ImageObserver)null);
         int position = 0;
+        List<Integer> randomPositions = new ArrayList();
 
-        List<Integer> randomPositions = new ArrayList<>();
-        if(starter) {
-            IntStream.range(0, rows*cols).forEach(randomPositions::add);
+        if(starter){
+            final List<Integer> randomGenerator = new ArrayList<>();
+            IntStream.range(0, this.rows * this.cols).forEach((item) -> {
+                randomGenerator.add(item);
+            });
+            randomPositions = new ArrayList<>(randomGenerator);
             Collections.shuffle(randomPositions);
-        } else {
+        }else{
             try {
-                randomPositions = this.controller.getCurrentPositions();
-                System.out.println("Current positions (sorted) are "+randomPositions);
+                randomPositions = controller.getSerializableTiles().stream().map(SerializableTile::getCurrentPosition).collect(Collectors.toList());
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
-        
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-            	final Image imagePortion = createImage(new FilteredImageSource(image.getSource(),
-                        new CropImageFilter(j * imageWidth / cols,
-                        					i * imageHeight / rows, 
-                        					(imageWidth / cols),
-                        					imageHeight / rows)));
 
-                tiles.add(new Tile(imagePortion, position, randomPositions.get(position)));
-                position++;
+        for(int i = 0; i < this.rows; ++i) {
+            for(int j = 0; j < this.cols; ++j) {
+                Image imagePortion = this.createImage(new FilteredImageSource(image.getSource(), new CropImageFilter(j * imageWidth / this.cols, i * imageHeight / this.rows, imageWidth / this.cols, imageHeight / this.rows)));
+                this.tiles.add(new Tile(imagePortion, position, randomPositions.get(position), 0));
+                ++position;
             }
         }
 
-        this.controller.loadCurrentPositions(this.tiles.stream().map(Tile::getCurrentPosition).collect(Collectors.toList()));
-	}
-
-	private List<Integer> getSortedDestinations(List<Integer> currentPositions) {
-        List<Integer> destinations = new ArrayList<>();
-        for(Integer i: currentPositions) {
-            destinations.add(currentPositions.indexOf(i));
+        //Solo se sono lo starter devo dire comunicare al BoardStatus l'initial board
+        if(starter){
+            controller.loadInitialBoard(this.getSerializableTiles());
         }
-        return destinations;
     }
-    
-    private void paintPuzzle() throws RemoteException {
-    	this.board.removeAll();
 
-    	Collections.sort(tiles);
+    private void paintPuzzle() {
+        this.board.removeAll();
+        Collections.sort(this.tiles);
 
-        List<Integer> selectedList = new ArrayList<>(controller.getSelectedList());
-
-        tiles.forEach(tile -> {
-    		final TileButton btn = new TileButton(tile);
+        this.tiles.forEach((tile) -> {
+            TileButton btn = new TileButton(tile);
             this.board.add(btn);
-            int id = selectedList.get(tiles.indexOf(tile));
-            btn.setBorder(BorderFactory.createLineBorder(id == 0 ? Color.gray : COLORS.get(id)));
-            btn.addActionListener(actionListener -> {
-                try {
-                    controller.select(tile.getCurrentPosition());
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+            final int id = tile.getSelection();
+            btn.setBorder(BorderFactory.createLineBorder(id == 0 ? Color.GRAY : COLORS.get(id)));
+            btn.addActionListener((actionListener) -> {
+                // Solo se la tile non è già selezionata
+                if(!tile.alreadySelected()){
+                    try {
+                        this.controller.select(tile.getSerializableTile());
+                        this.checkSolution();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                 }
-
-                /*
-                selectionManager.selectTile(tile, () -> {
-            		paintPuzzle();
-                	checkSolution();
-            	});
-
-                 */
             });
-    	});
-    	
-    	pack();
-        setLocationRelativeTo(null);
+        });
+        this.pack();
+        this.setLocationRelativeTo((Component)null);
     }
 
     private void checkSolution() {
-    	if(tiles.stream().allMatch(Tile::isInRightPlace)) {
-    		JOptionPane.showMessageDialog(this, "Puzzle Completed!", "", JOptionPane.INFORMATION_MESSAGE);
-    	}
-    }
-
-    public void updateBoard() {
-        try {
-            /*
-            List<Integer> currentPositions = this.controller.getCurrentPositions();
-            for(int i = 0; i < currentPositions.size(); i++) {
-                tiles.get(i).setCurrentPosition(currentPositions.get(i));
-            }
-
-             */
-            paintPuzzle();
-            checkSolution();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        if (this.tiles.stream().allMatch(Tile::isInRightPlace)) {
+            JOptionPane.showMessageDialog(this, "Puzzle Completed!", "", 1);
         }
 
+    }
+    public void updateBoard() throws RemoteException {
+        List<SerializableTile> serializableTiles = controller.getSerializableTiles();
+        for(int i=0;i<serializableTiles.size();i++){
+            tiles.get(i).setCurrentPosition(serializableTiles.get(i).getCurrentPosition());
+            tiles.get(i).select(serializableTiles.get(i).getSelection());
+        }
+        paintPuzzle();
+    }
+
+    public List<SerializableTile> getSerializableTiles(){
+        return tiles.stream().map(Tile::getSerializableTile).collect(Collectors.toList());
     }
 }

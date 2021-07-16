@@ -1,6 +1,7 @@
 package part2.rmi.controller;
 
 import part2.rmi.puzzle.PuzzleBoard;
+import part2.rmi.puzzle.SerializableTile;
 import part2.rmi.remotes.*;
 
 import java.util.List;
@@ -44,27 +45,27 @@ public class Controller {
         }
     }
 
-    public List<Integer> getSelectedList() throws RemoteException {
-        return this.boardStatus.getSelectedList();
-    }
-
-    public List<Integer> getCurrentPositions() throws RemoteException {
-        return this.boardStatus.getCurrentPositions();
-    }
-
-    public void select(int index) throws RemoteException {
-        this.boardStatus.select(index, this.id);
+    public void select(SerializableTile tile) throws RemoteException {
+        this.boardStatus.select(tile);
     }
 
     public void update() {
-        this.puzzleBoard.updateBoard();
-    }
-
-    public void loadCurrentPositions(List<Integer> currentPositions) {
         try {
-            this.boardStatus.loadCurrentPositions(currentPositions);
+            this.puzzleBoard.updateBoard();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public void loadInitialBoard(List<SerializableTile> tiles) {
+        try {
+            this.boardStatus.loadCurrentTiles(tiles);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<SerializableTile> getSerializableTiles() throws RemoteException {
+        return this.boardStatus.getTiles();
     }
 }

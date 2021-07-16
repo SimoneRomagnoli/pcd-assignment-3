@@ -32,7 +32,7 @@ public class Joiner1 {
 
             //CREATE OWN MODEL
             BoardStatus remoteBoard = (BoardStatus) LocateRegistry.getRegistry(Starter.REGISTRY_PORT).lookup("boardStatus");
-            BoardStatus localBoard = new BoardStatusImpl(remoteBoard.getSelectedList(), remoteBoard.getCurrentPositions());
+            BoardStatus localBoard = new BoardStatusImpl(remoteBoard.getTiles(), id);
             BoardStatus localBoardStub = (BoardStatus) UnicastRemoteObject.exportObject(localBoard, 0);
             LocateRegistry.getRegistry(Starter.REGISTRY_PORT+id).rebind("boardStatus", localBoardStub);
 
