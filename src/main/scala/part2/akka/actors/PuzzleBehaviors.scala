@@ -6,7 +6,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import part2.akka.actors.PuzzleBehaviors.Joiner.Joinable
 import part2.akka.actors.PuzzleBehaviors.Messages.Event
 import part2.akka.actors.PuzzleBehaviors.Player.{Command, CutStatus, PlayerServiceKey, SelectedRemoteCell}
-import part2.akka.actors.PuzzleBehaviors.SelectionGuardian.{CutRequest, Selection}
+import part2.akka.actors.PuzzleBehaviors.SelectionGuardian.{CutRequest, GuardianServiceKey, Selection}
 import part2.akka.board.Tiles.Tile
 import part2.akka.board.{PuzzleBoard, PuzzleOptions}
 
@@ -85,7 +85,7 @@ object PuzzleBehaviors {
           for (joiner <- joiners) {
             selectionGuardian ! CutRequest(ctx.self, joiner)
           }
-          running(ctx, id, joinedPlayers+joiners.size, puzzleBoard, selectionGuardian, selectionsFromCut)
+          running(ctx, id, joinedPlayers, puzzleBoard, selectionGuardian, selectionsFromCut)
 
         case SelectedRemoteCell(remoteId, selectedCurrentPosition) =>
           if (remoteId != id) {
@@ -98,10 +98,13 @@ object PuzzleBehaviors {
         case CutStatus(selections, joiner) =>
           selectionsFromCut append selections
           if(selectionsFromCut.size equals joinedPlayers) {
-            if(selectionsFromCut.forall(selectionList => selectionList equals selectionsFromCut.head)) {
+            ctx.log.info(s"selections from cut is $selectionsFromCut")
+            ctx.log.info(s"my selection is ${puzzleBoard.selectionList}")
+            if(selectionsFromCut.forall(selectionList => selectionList equals puzzleBoard.selectionList)) {
               ctx.log.info("CONSISTENT CUT")
               val currentPositions: List[Int] = puzzleBoard.tiles.sorted((a: Tile, b: Tile) => a.originalPosition - b.originalPosition).map(tile => tile.currentPosition)
               joiner ! Joinable(joinedPlayers + 1, puzzleBoard.rows, currentPositions, puzzleBoard.selectionList)
+              running(ctx, id, joinedPlayers+1, puzzleBoard, selectionGuardian, selectionsFromCut)
             } else {
               ctx.log.info("INCONSISTENT CUT")
             }
@@ -115,11 +118,13 @@ object PuzzleBehaviors {
     val GuardianServiceKey: ServiceKey[Selection] = ServiceKey[Selection]("guardian")
 
     sealed trait Selection
-    private final case class PlayersUpdated(newPlayers: Set[ActorRef[Command]]) extends Selection
-    private final case class GuardiansUpdated(newGuardians: Set[ActorRef[Selection]]) extends Selection
+
     final case class SelectedCell(currentPosition: Int) extends Selection with CborSerializable
     final case class CutRequest(replyTo:ActorRef[Command], joiner:ActorRef[Event]) extends Selection with CborSerializable
     final case class Marker(replyTo:ActorRef[Command], joiner:ActorRef[Event]) extends Selection with CborSerializable
+
+    private final case class PlayersUpdated(newPlayers: Set[ActorRef[Command]]) extends Selection
+    private final case class GuardiansUpdated(newGuardians: Set[ActorRef[Selection]]) extends Selection
 
     var cutRunning:Boolean = false
 
@@ -128,18 +133,17 @@ object PuzzleBehaviors {
     }
 
     def apply(id: Int, selectionList: List[Int]): Behavior[Selection] = Behaviors.setup { ctx =>
-      val playerSubscriptionAdapter = ctx.messageAdapter[Receptionist.Listing] {
+      val receptionistSubscriptionAdapter = ctx.messageAdapter[Receptionist.Listing] {
+        case GuardianServiceKey.Listing(guardians) =>
+          GuardiansUpdated(guardians)
         case Player.PlayerServiceKey.Listing(players) =>
           PlayersUpdated(players)
       }
 
-      val guardianSubscriptionAdapter = ctx.messageAdapter[Receptionist.Listing] {
-        case GuardianServiceKey.Listing(guardians) =>
-          GuardiansUpdated(guardians)
-      }
+      ctx.system.receptionist ! Receptionist.Subscribe(SelectionGuardian.GuardianServiceKey, receptionistSubscriptionAdapter)
+      ctx.system.receptionist ! Receptionist.Subscribe(Player.PlayerServiceKey, receptionistSubscriptionAdapter)
 
-      ctx.system.receptionist ! Receptionist.Subscribe(SelectionGuardian.GuardianServiceKey, guardianSubscriptionAdapter)
-      ctx.system.receptionist ! Receptionist.Subscribe(Player.PlayerServiceKey, playerSubscriptionAdapter)
+      ctx.system.receptionist ! Receptionist.Register(GuardianServiceKey, ctx.self)
 
       running(ctx, id, selectionList, mutable.Queue.empty, IndexedSeq.empty, IndexedSeq.empty)
     }
