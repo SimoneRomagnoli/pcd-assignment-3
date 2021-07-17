@@ -4,7 +4,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorSystem, Behavior}
 import akka.cluster.typed.Cluster
 import com.typesafe.config.ConfigFactory
-import part2.akka.actors.PuzzleBehaviors.{Joiner, Starter}
+import part2.akka.actors.StartBehaviors.{Joiner, Starter}
 
 import java.awt.Color
 

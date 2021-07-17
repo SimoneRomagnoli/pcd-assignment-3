@@ -4,7 +4,7 @@ import akka.actor.typed.{ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.typed.Cluster
 import com.typesafe.config.ConfigFactory
-import part2.akka.actors.PuzzleBehaviors.{Joiner, Starter}
+import part2.akka.actors.StartBehaviors.{Joiner, Starter}
 
 import java.awt.Color
 
@@ -19,12 +19,9 @@ object StarterMain {
   object RootBehavior {
     def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
       val cluster = Cluster(ctx.system)
-      ctx.log.info(s"members before init are ${cluster.state.members.size}")
       if(cluster.selfMember.hasRole("starter")) {
-        ctx.log.info("i spawn a starter")
         ctx.spawn(Starter(), "Starter")
       } else {
-        ctx.log.info("i spawn a joiner")
         ctx.spawn(Joiner(), s"Joiner${cluster.state.members.size-1}")
       }
       Behaviors.empty

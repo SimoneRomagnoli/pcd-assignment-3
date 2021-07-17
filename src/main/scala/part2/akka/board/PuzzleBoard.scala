@@ -1,9 +1,9 @@
 package part2.akka.board
 
 import akka.actor.typed.ActorRef
-import part2.akka.actors.PuzzleBehaviors.SelectionGuardian.{SelectedCell, Selection}
 import Tiles.{SelectionManager, Tile, TileButton}
 import part2.akka.StarterMain
+import part2.akka.actors.Player.{PlayerMessage, SelectedCell}
 
 import java.awt.image.{BufferedImage, CropImageFilter, FilteredImageSource}
 import java.awt.{BorderLayout, Color, GridLayout, Image}
@@ -12,7 +12,7 @@ import javax.imageio.ImageIO
 import javax.swing._
 import scala.util.Random
 
-case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var selectionList:List[Int], selectionGuardian:ActorRef[Selection], var tiles: List[Tile] = List(), selectionManager:SelectionManager = SelectionManager()) extends JFrame {
+case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var selectionList:List[Int], player:ActorRef[PlayerMessage], var tiles: List[Tile] = List(), selectionManager:SelectionManager = SelectionManager()) extends JFrame {
   setTitle("Puzzle")
   setResizable(false)
   setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -79,12 +79,11 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
         btn.setBorder(BorderFactory.createLineBorder(color, 3))
         btn.addActionListener(_ => {
           if(selectionList(index) == 0)
-            selectionGuardian ! SelectedCell(tile.currentPosition)
+            player ! SelectedCell(tile.currentPosition)
         })
     }
 
     pack()
-    //setLocationRelativeTo(null)
   }
 
   def remoteSelection(selectedPosition:Int, remoteId:Int): Unit = {
@@ -104,23 +103,9 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
     checkSolution()
   }
 
-  def localSelection(selectedPosition:Int, localId:Int): Unit = {
-    if(!selectionList.contains(localId)) {
-      selectionList = selectionList.patch(selectedPosition, Seq(localId), 1)
-      tiles.filter(tile => tile.currentPosition == selectedPosition).head.selected = true
-    } else {
-      val firstSelection = selectionList.indexOf(localId)
-      selectionList = selectionList.patch(firstSelection, Seq(0), 1)
-      tiles.filter(tile => tile.currentPosition == firstSelection).head.selected = false
-    }
-    selectionManager.selectTile(tiles.filter(tile => tile.currentPosition==selectedPosition).head, () => {
-      paintPuzzle()
-      checkSolution()
-    })
-  }
 }
 
-case class PuzzleOptions(rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int] = List(), var selectionList:List[Int] = List()) {
+case class PuzzleOptions(rows: Int = 3, cols: Int = 5, starter:Boolean, currentPositions:List[Int] = List(), var selectionList:List[Int] = List()) {
   if(selectionList.isEmpty)
     selectionList = LazyList.continually(0).take(rows * cols).toList
 }
