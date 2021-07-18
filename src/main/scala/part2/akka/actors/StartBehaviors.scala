@@ -5,12 +5,20 @@ import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.Behaviors
 import part2.akka.board.PuzzleOptions
 
+/**
+ * Contains the possible behaviors of a starting game.
+ *
+ */
 object StartBehaviors {
 
-  sealed trait Event
+  sealed trait StartEvent
 
+  /**
+   * Starts a game.
+   *
+   */
   object Starter {
-    def apply(): Behavior[Event] = Behaviors.setup[Event] { ctx =>
+    def apply(): Behavior[StartEvent] = Behaviors.setup[StartEvent] { ctx =>
       val puzzleOptions: PuzzleOptions =
         PuzzleOptions(starter = true)
 
@@ -19,11 +27,17 @@ object StartBehaviors {
     }
   }
 
+  /**
+   * Joins a game.
+   *
+   */
   object Joiner {
-    val JoinerServiceKey: ServiceKey[Event] = ServiceKey[Event]("joiner")
-    final case class Joinable(id: Int, currentPositions: List[Int], selectionList: List[Int]) extends Event with CborSerializable
 
-    def apply(): Behavior[Event] = Behaviors.setup[Event] { ctx =>
+    final case class Joinable(id: Int, currentPositions: List[Int], selectionList: List[Int]) extends StartEvent with CborSerializable
+
+    val JoinerServiceKey: ServiceKey[StartEvent] = ServiceKey[StartEvent]("joiner")
+
+    def apply(): Behavior[StartEvent] = Behaviors.setup[StartEvent] { ctx =>
       ctx.system.receptionist ! Receptionist.Register(JoinerServiceKey, ctx.self)
 
       Behaviors.receiveMessage {

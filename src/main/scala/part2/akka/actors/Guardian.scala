@@ -5,12 +5,17 @@ import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import part2.akka.actors.Player.{CutFinished, CutStarted, PlayerMessage, SelectedRemoteCell}
 import part2.akka.actors.StartBehaviors.Joiner.Joinable
-import part2.akka.actors.StartBehaviors.{Event, Joiner}
+import part2.akka.actors.StartBehaviors.{StartEvent, Joiner}
 
 import scala.collection.mutable
 
+/**
+ * Behavior of a guardian:
+ * it propagates local changes handling critical sections and receives remote ones;
+ * in addition, it takes join requests and responds with a snapshot of the global status of the distributed system.
+ *
+ */
 object Guardian {
-  val GuardianServiceKey: ServiceKey[GuardianMessage] = ServiceKey[GuardianMessage]("guardian")
 
   sealed trait GuardianMessage
 
@@ -19,14 +24,16 @@ object Guardian {
   final case class RemoteSelection(currentPosition: Int, id:Int) extends GuardianMessage with CborSerializable
 
   //CUT MESSAGES
-  final case class Marker(replyTo:ActorRef[GuardianMessage], joiner:ActorRef[Event]) extends GuardianMessage with CborSerializable
+  final case class Marker(replyTo:ActorRef[GuardianMessage], joiner:ActorRef[StartEvent]) extends GuardianMessage with CborSerializable
   final case class LocalStatus(selectionList:List[Int], currentPositions:List[Int]) extends GuardianMessage with CborSerializable
   final case class RemoteStatus(selectionList:List[Int], currentPositions:List[Int]) extends GuardianMessage with CborSerializable
   final case class StopCut() extends GuardianMessage with CborSerializable
 
   //RECEPTIONIST UPDATES
   private final case class GuardiansUpdated(newGuardians: Set[ActorRef[GuardianMessage]]) extends GuardianMessage
-  private final case class JoinersUpdated(newJoiners: Set[ActorRef[Event]]) extends GuardianMessage
+  private final case class JoinersUpdated(newJoiners: Set[ActorRef[StartEvent]]) extends GuardianMessage
+
+  val GuardianServiceKey: ServiceKey[GuardianMessage] = ServiceKey[GuardianMessage]("guardian")
 
   var id = 0
 
@@ -49,6 +56,14 @@ object Guardian {
     inGame(ctx, player, IndexedSeq.empty)
   }
 
+  /**
+   * Behavior of the guardian during the game
+   *
+   * @param ctx, a reference to the actor's context
+   * @param player, a reference to the player
+   * @param guardians, a list of the other guardians in the game
+   * @return the guardian behavior
+   */
   private def inGame(ctx: ActorContext[GuardianMessage],
                      player: ActorRef[PlayerMessage],
                      guardians: IndexedSeq[ActorRef[GuardianMessage]]): Behavior[GuardianMessage] = {
@@ -78,11 +93,23 @@ object Guardian {
     }
   }
 
+  /**
+   * Behavior of the guardian during the system cut
+   *
+   * @param ctx, a reference to the actor's context
+   * @param player, a reference to the player
+   * @param guardians, a list of the other guardians in the game
+   * @param replyTo, a reference to the guardian that started the system cut
+   * @param joiner, a reference to the actor that wants to join the game
+   * @param selections, a queue of the remote selection lists
+   * @param positions, a queue of the remote current position lists
+   * @return
+   */
   private def inCut(ctx: ActorContext[GuardianMessage],
                     player: ActorRef[PlayerMessage],
                     guardians: IndexedSeq[ActorRef[GuardianMessage]],
                     replyTo: ActorRef[GuardianMessage],
-                    joiner: ActorRef[Event],
+                    joiner: ActorRef[StartEvent],
                     selections:mutable.Queue[List[Int]] = mutable.Queue.empty,
                     positions:mutable.Queue[List[Int]] = mutable.Queue.empty
                    ): Behavior[GuardianMessage] = {

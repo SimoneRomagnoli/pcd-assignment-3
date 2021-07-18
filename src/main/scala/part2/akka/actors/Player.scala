@@ -8,6 +8,11 @@ import part2.akka.board.{PuzzleBoard, PuzzleOptions}
 
 import scala.collection.mutable
 
+/**
+ * Behavior of a player in the actor system.
+ * It interacts with the gui and with the local guardian.
+ *
+ */
 object Player {
 
   sealed trait PlayerMessage
@@ -19,7 +24,6 @@ object Player {
   final case class CutFinished() extends PlayerMessage with CborSerializable
 
   var id = 0
-  var joinedPlayers = 0
 
   def apply(id: Int, puzzleOptions: PuzzleOptions): Behavior[PlayerMessage] = Behaviors.setup { ctx =>
     this.id = id
@@ -34,6 +38,14 @@ object Player {
     inGame(ctx, puzzleBoard, guardian)
   }
 
+  /**
+   * Behavior of the player during the game
+   *
+   * @param ctx, a reference to the actor's context
+   * @param puzzleBoard, the gui
+   * @param guardian, a reference to the local guardian
+   * @return the player's behavior
+   */
   private def inGame(ctx: ActorContext[PlayerMessage],
                      puzzleBoard: PuzzleBoard,
                      guardian: ActorRef[GuardianMessage]
@@ -55,25 +67,34 @@ object Player {
     }
   }
 
+  /**
+   * Behavior of the player during a snapshot procedure.
+   *
+   * @param ctx, a reference to the actor's context
+   * @param puzzleBoard, the gui
+   * @param guardian, a reference to the local guardian
+   * @param messageQueue, a queue of incoming messages
+   * @return the player's behavior during a system cut
+   */
   private def inCut(ctx: ActorContext[PlayerMessage],
                     puzzleBoard: PuzzleBoard,
-                    selectionGuardian: ActorRef[GuardianMessage],
+                    guardian: ActorRef[GuardianMessage],
                     messageQueue: mutable.Queue[SelectedCell] = mutable.Queue.empty
                     ): Behavior[PlayerMessage] = {
 
     Behaviors.receiveMessage {
       case CutStarted() =>
-        inCut(ctx, puzzleBoard, selectionGuardian, messageQueue)
+        inCut(ctx, puzzleBoard, guardian, messageQueue)
 
       case SelectedCell(currentPosition) =>
         messageQueue append SelectedCell(currentPosition)
-        inCut(ctx, puzzleBoard, selectionGuardian, messageQueue)
+        inCut(ctx, puzzleBoard, guardian, messageQueue)
 
       case CutFinished() =>
         for(message <- messageQueue) {
           ctx.self ! message
         }
-        inGame(ctx, puzzleBoard, selectionGuardian)
+        inGame(ctx, puzzleBoard, guardian)
     }
   }
 

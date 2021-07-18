@@ -1,8 +1,8 @@
 package part2.akka.board
 
 import akka.actor.typed.ActorRef
-import Tiles.{SelectionManager, Tile, TileButton}
-import part2.akka.StarterMain
+import Tiles.{Tile, TileButton}
+import part2.akka.StarterActor
 import part2.akka.actors.Player.{PlayerMessage, SelectedCell}
 
 import java.awt.image.{BufferedImage, CropImageFilter, FilteredImageSource}
@@ -12,7 +12,19 @@ import javax.imageio.ImageIO
 import javax.swing._
 import scala.util.Random
 
-case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var selectionList:List[Int], player:ActorRef[PlayerMessage], var tiles: List[Tile] = List(), selectionManager:SelectionManager = SelectionManager()) extends JFrame {
+/**
+ * Graphical user interface of the puzzle board.
+ *
+ * @param localId, the id of the player that starts the gui
+ * @param rows, number of puzzle rows
+ * @param cols, number of puzzle columns
+ * @param starter, true if the player starts a new game, false if the player joins a game
+ * @param currentPositions, list of current positions of puzzle tiles
+ * @param selectionList, list of identifiers of players that selected a tile
+ * @param player, a reference to the local Player actor
+ * @param tiles, list of tiles in the board
+ */
+case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, currentPositions:List[Int], var selectionList:List[Int], player:ActorRef[PlayerMessage], var tiles: List[Tile] = List()) extends JFrame {
   setTitle("Puzzle")
   setResizable(false)
   setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -26,7 +38,13 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
   paintPuzzle()
   this.setVisible(true)
 
-  private def createTiles(): Unit = {
+  /**
+   * Create the tiles list:
+   * if the player is a starter, randomly select an order of tiles,
+   * if the player is a joiner, use the current positions list.
+   *
+   */
+  def createTiles(): Unit = {
     val imgPath:String = "res/numbers-smaller.png"
     val img: BufferedImage = ImageIO.read(new File(imgPath))
     if (img equals null) {
@@ -60,22 +78,30 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
     }
   }
 
-  private def checkSolution(): Unit = {
+  /**
+   * Checks if the current solution is correct.
+   *
+   */
+  def checkSolution(): Unit = {
     if (tiles.forall(t => t.isInRightPlace))
       JOptionPane.showMessageDialog(this, "Puzzle Completed!")
   }
 
+  /**
+   * Redraw the puzzle on the gui.
+   *
+   */
   def paintPuzzle(): Unit = {
     board.removeAll()
     tiles = tiles.sorted
 
     tiles.zipWithIndex.foreach {
       case (tile, index) =>
-        val btn = TileButton(StarterMain.playersToColors(localId),tile)
+        val btn = TileButton(StarterActor.playersToColors(localId),tile)
         board.add(btn)
         val color:Color =
           if(selectionList(index) == 0) Color.gray
-          else StarterMain.playersToColors(selectionList(index))
+          else StarterActor.playersToColors(selectionList(index))
         btn.setBorder(BorderFactory.createLineBorder(color, 3))
         btn.addActionListener(_ => {
           if(selectionList(index) == 0)
@@ -86,6 +112,12 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
     pack()
   }
 
+  /**
+   * Update the gui with a new selection
+   *
+   * @param selectedPosition, the index of the position selected
+   * @param remoteId, the identifier of the player that selected it
+   */
   def remoteSelection(selectedPosition:Int, remoteId:Int): Unit = {
     if(!selectionList.contains(remoteId)) {
       selectionList = selectionList.patch(selectedPosition, Seq(remoteId), 1)
@@ -96,15 +128,36 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
 
       val tile1:Tile = tiles.filter(tile => tile.currentPosition == firstSelection).head
       val tile2:Tile = tiles.filter(tile => tile.currentPosition == selectedPosition).head
-      selectionManager.swap(tile1, tile2)
+      swap(tile1, tile2)
       tile1.selected = false
     }
     paintPuzzle()
     checkSolution()
   }
 
+  /**
+   * Swaps two selected tiles.
+   *
+   * @param t1, first tile
+   * @param t2, second tile
+   */
+  def swap(t1: Tile, t2: Tile): Unit = {
+    val position = t1.currentPosition
+    t1.setCurrentPosition(t2.currentPosition)
+    t2.setCurrentPosition(position)
+  }
+
 }
 
+/**
+ * Wrapper of gui arguments
+ *
+ * @param rows, number of puzzle rows
+ * @param cols, number of puzzle columns
+ * @param starter, true if the player starts a new game, false if the player joins a game
+ * @param currentPositions, list of current positions of puzzle tiles
+ * @param selectionList, list of identifiers of players that selected a tile
+ */
 case class PuzzleOptions(rows: Int = 3, cols: Int = 5, starter:Boolean, currentPositions:List[Int] = List(), var selectionList:List[Int] = List()) {
   if(selectionList.isEmpty)
     selectionList = LazyList.continually(0).take(rows * cols).toList
