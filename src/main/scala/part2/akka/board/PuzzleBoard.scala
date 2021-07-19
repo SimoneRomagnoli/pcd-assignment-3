@@ -104,8 +104,10 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
           else StarterActor.playersToColors(selectionList(index))
         btn.setBorder(BorderFactory.createLineBorder(color, 3))
         btn.addActionListener(_ => {
-          if(selectionList(index) == 0)
-            player ! SelectedCell(tile.currentPosition)
+          if(selectionList(index) == 0) {
+            val timestamp: Double = System.currentTimeMillis()
+            player ! SelectedCell(tile.currentPosition, timestamp)
+          }
         })
     }
 
@@ -119,20 +121,22 @@ case class PuzzleBoard(localId:Int, rows: Int, cols: Int, starter:Boolean, curre
    * @param remoteId, the identifier of the player that selected it
    */
   def remoteSelection(selectedPosition:Int, remoteId:Int): Unit = {
-    if(!selectionList.contains(remoteId)) {
-      selectionList = selectionList.patch(selectedPosition, Seq(remoteId), 1)
-      tiles.filter(tile => tile.currentPosition == selectedPosition).head.selected = true
-    } else {
-      val firstSelection = selectionList.indexOf(remoteId)
-      selectionList = selectionList.patch(firstSelection, Seq(0), 1)
+    if(selectionList(selectedPosition) == 0) {
+      if(!selectionList.contains(remoteId)) {
+        selectionList = selectionList.patch(selectedPosition, Seq(remoteId), 1)
+        tiles.filter(tile => tile.currentPosition == selectedPosition).head.selected = true
+      } else {
+        val firstSelection = selectionList.indexOf(remoteId)
+        selectionList = selectionList.patch(firstSelection, Seq(0), 1)
 
-      val tile1:Tile = tiles.filter(tile => tile.currentPosition == firstSelection).head
-      val tile2:Tile = tiles.filter(tile => tile.currentPosition == selectedPosition).head
-      swap(tile1, tile2)
-      tile1.selected = false
+        val tile1:Tile = tiles.filter(tile => tile.currentPosition == firstSelection).head
+        val tile2:Tile = tiles.filter(tile => tile.currentPosition == selectedPosition).head
+        swap(tile1, tile2)
+        tile1.selected = false
+      }
+      paintPuzzle()
+      checkSolution()
     }
-    paintPuzzle()
-    checkSolution()
   }
 
   /**
