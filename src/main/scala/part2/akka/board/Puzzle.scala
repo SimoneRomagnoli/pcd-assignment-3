@@ -2,7 +2,6 @@ package part2.akka.board
 
 import akka.actor.typed.ActorRef
 import Tiles.{Tile, TileButton}
-import part2.akka.StarterActor
 import part2.akka.actors.Player.{PlayerMessage, SelectedCell}
 
 import java.awt.image.{BufferedImage, CropImageFilter, FilteredImageSource}

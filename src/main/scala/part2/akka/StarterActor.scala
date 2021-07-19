@@ -6,8 +6,6 @@ import akka.cluster.typed.Cluster
 import com.typesafe.config.ConfigFactory
 import part2.akka.actors.StartBehaviors.{Joiner, Starter}
 
-import java.awt.Color
-
 /**
  * Launch an actor system that starts a new puzzle game.
  *
