@@ -47,10 +47,8 @@ object JoinerActor1 {
     def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
       val cluster = Cluster(ctx.system)
       if(cluster.selfMember.hasRole("starter")) {
-        ctx.log.info("i spawn a starter")
         ctx.spawn(Starter(), "Starter")
       } else {
-        ctx.log.info("i spawn a joiner")
         ctx.spawn(Joiner(), s"Joiner${cluster.state.members.size-1}")
       }
       Behaviors.empty
