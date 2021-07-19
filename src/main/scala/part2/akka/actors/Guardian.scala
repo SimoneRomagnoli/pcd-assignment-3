@@ -4,7 +4,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import part2.akka.actors.Player.{CutFinished, CutStarted, PlayerMessage, SelectedRemoteCell}
-import part2.akka.actors.StartBehaviors.Joiner.Joinable
+import part2.akka.actors.StartBehaviors.Joiner.{GuardianReference, GlobalStatus}
 import part2.akka.actors.StartBehaviors.{Joiner, StartEvent}
 
 import scala.collection.mutable
@@ -28,6 +28,7 @@ object Guardian {
   final case class CriticalSectionOK(remoteId:Int) extends GuardianMessage with CborSerializable
 
   //CUT MESSAGES
+  final case class JoinRequest(joiner:ActorRef[StartEvent]) extends GuardianMessage with CborSerializable
   final case class Marker(replyTo:ActorRef[GuardianMessage], joiner:ActorRef[StartEvent]) extends GuardianMessage with CborSerializable
   final case class LocalStatus(selectionList:List[Int], currentPositions:List[Int]) extends GuardianMessage with CborSerializable
   final case class RemoteStatus(selectionList:List[Int], currentPositions:List[Int], remoteId:Int) extends GuardianMessage with CborSerializable
@@ -80,7 +81,13 @@ object Guardian {
         Behaviors.same
 
       case JoinersUpdated(joiners) =>
-        for (joiner <- joiners; guardian <- guardians) {
+        for(joiner <- joiners) {
+          joiner ! GuardianReference(ctx.self)
+        }
+        Behaviors.same
+
+      case JoinRequest(joiner) =>
+        for (guardian <- guardians) {
           guardian ! Marker(ctx.self, joiner)
         }
         Behaviors.same
@@ -169,7 +176,7 @@ object Guardian {
           val globalSelectionsCut: List[Int] = selections.toList.groupBy(identity).maxBy { case (_, occurrences) => occurrences.size }._1
           val globalPositionsCut: List[Int] = positions.toList.groupBy(identity).maxBy { case (_, occurrences) => occurrences.size }._1
           val nextId: Int = identifiers.toList.max + 1
-          joiner ! Joinable(nextId, globalPositionsCut, globalSelectionsCut)
+          joiner ! GlobalStatus(nextId, globalPositionsCut, globalSelectionsCut)
           for (guardian <- guardians) {
             guardian ! StopCut()
           }

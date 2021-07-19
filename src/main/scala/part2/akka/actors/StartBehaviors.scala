@@ -1,8 +1,9 @@
 package part2.akka.actors
 
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
+import part2.akka.actors.Guardian.{GuardianMessage, JoinRequest}
 import part2.akka.board.Puzzle.PuzzleOptions
 
 /**
@@ -33,7 +34,8 @@ object StartBehaviors {
    */
   object Joiner {
 
-    final case class Joinable(id: Int, currentPositions: List[Int], selectionList: List[Int]) extends StartEvent with CborSerializable
+    final case class GuardianReference(guardian: ActorRef[GuardianMessage]) extends StartEvent with CborSerializable
+    final case class GlobalStatus(id: Int, currentPositions: List[Int], selectionList: List[Int]) extends StartEvent with CborSerializable
 
     val JoinerServiceKey: ServiceKey[StartEvent] = ServiceKey[StartEvent]("joiner")
 
@@ -41,7 +43,18 @@ object StartBehaviors {
       ctx.system.receptionist ! Receptionist.Register(JoinerServiceKey, ctx.self)
 
       Behaviors.receiveMessage {
-        case Joinable(id, currentPositions, selectionList) =>
+        case GuardianReference(guardian) =>
+          guardian ! JoinRequest(ctx.self)
+          inJoin(ctx)
+      }
+    }
+
+    def inJoin(ctx:ActorContext[StartEvent]): Behavior[StartEvent] = {
+      Behaviors.receiveMessage {
+        case GuardianReference(_) =>
+            Behaviors.same
+
+        case GlobalStatus(id, currentPositions, selectionList) =>
           ctx.system.receptionist ! Receptionist.Deregister(JoinerServiceKey, ctx.self)
 
           val puzzleOptions: PuzzleOptions =
