@@ -3,7 +3,7 @@ package part2.akka.actors
 import akka.actor.typed.Behavior
 import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.Behaviors
-import part2.akka.board.PuzzleOptions
+import part2.akka.board.Puzzle.PuzzleOptions
 
 /**
  * Contains the possible behaviors of a starting game.

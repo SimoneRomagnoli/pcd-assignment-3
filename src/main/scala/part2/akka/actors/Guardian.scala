@@ -8,7 +8,6 @@ import part2.akka.actors.StartBehaviors.Joiner.Joinable
 import part2.akka.actors.StartBehaviors.{Joiner, StartEvent}
 
 import scala.collection.mutable
-import scala.math.Ordering.Implicits.seqOrdering
 
 /**
  * Behavior of a guardian:
@@ -58,7 +57,7 @@ object Guardian {
 
     ctx.system.receptionist ! Receptionist.Register(GuardianServiceKey, ctx.self)
 
-    inGame(ctx, player, IndexedSeq.empty)
+    inGame(ctx, player)
   }
 
   /**
@@ -66,33 +65,32 @@ object Guardian {
    *
    * @param ctx, a reference to the actor's context
    * @param player, a reference to the player
-   * @param guardians, a list of the other guardians in the game
    * @return the guardian behavior
    */
-  private def inGame(ctx: ActorContext[GuardianMessage],
-                     player: ActorRef[PlayerMessage],
-                     guardians: IndexedSeq[ActorRef[GuardianMessage]],
-                     criticalSectionRequests:mutable.Queue[(Double, Int)] = mutable.Queue.empty,
-                     criticalSectionReplies:mutable.Queue[Int] = mutable.Queue.empty,
-                     remoteCriticalSectionRequests: mutable.Queue[ActorRef[GuardianMessage]] = mutable.Queue.empty
-                    ): Behavior[GuardianMessage] = {
+  private def inGame(ctx: ActorContext[GuardianMessage], player: ActorRef[PlayerMessage]): Behavior[GuardianMessage] = {
+    var guardians: IndexedSeq[ActorRef[GuardianMessage]] = IndexedSeq.empty
+
+    val criticalSectionRequests:mutable.Queue[(Double, Int)] = mutable.Queue.empty
+    val criticalSectionReplies:mutable.Queue[Int] = mutable.Queue.empty
+    val remoteCriticalSectionRequests: mutable.Queue[ActorRef[GuardianMessage]] = mutable.Queue.empty
 
     Behaviors.receiveMessage {
       case GuardiansUpdated(newGuardians) =>
-        inGame(ctx, player, newGuardians.toIndexedSeq, criticalSectionRequests, criticalSectionReplies, remoteCriticalSectionRequests)
+        guardians = newGuardians.toIndexedSeq
+        Behaviors.same
 
       case JoinersUpdated(joiners) =>
         for (joiner <- joiners; guardian <- guardians) {
           guardian ! Marker(ctx.self, joiner)
         }
-        inGame(ctx, player, guardians, criticalSectionRequests, criticalSectionReplies, remoteCriticalSectionRequests)
+        Behaviors.same
 
       case SelectionRequest(currentPosition, timestamp) =>
         criticalSectionRequests.append((timestamp, currentPosition))
         for (guardian <- guardians) {
           guardian ! CriticalSectionRequest(timestamp, ctx.self)
         }
-        inGame(ctx, player, guardians, criticalSectionRequests, criticalSectionReplies, remoteCriticalSectionRequests)
+        Behaviors.same
 
       case CriticalSectionRequest(timestamp, replyTo) =>
         if(criticalSectionRequests.isEmpty || criticalSectionRequests.head._1 >= timestamp) {
@@ -100,7 +98,7 @@ object Guardian {
         } else {
           remoteCriticalSectionRequests append replyTo
         }
-        inGame(ctx, player, guardians, criticalSectionRequests, criticalSectionReplies, remoteCriticalSectionRequests)
+        Behaviors.same
 
       case CriticalSectionOK(remoteId) =>
         criticalSectionReplies append remoteId
@@ -121,11 +119,11 @@ object Guardian {
           remoteCriticalSectionRequests.clear()
           criticalSectionReplies.clear()
         }
-        inGame(ctx, player, guardians, criticalSectionRequests, criticalSectionReplies, remoteCriticalSectionRequests)
+        Behaviors.same
 
       case RemoteSelection(currentPosition, id) =>
         player ! SelectedRemoteCell(currentPosition, id)
-        inGame(ctx, player, guardians, criticalSectionRequests, criticalSectionReplies, remoteCriticalSectionRequests)
+        Behaviors.same
 
       case Marker(replyTo, joiner) =>
         inCut(ctx, player, guardians, replyTo, joiner)
@@ -137,29 +135,30 @@ object Guardian {
    *
    * @param ctx, a reference to the actor's context
    * @param player, a reference to the player
-   * @param guardians, a list of the other guardians in the game
    * @param replyTo, a reference to the guardian that started the system cut
    * @param joiner, a reference to the actor that wants to join the game
-   * @param selections, a queue of the remote selection lists
-   * @param positions, a queue of the remote current position lists
    * @return
    */
   private def inCut(ctx: ActorContext[GuardianMessage],
                     player: ActorRef[PlayerMessage],
-                    guardians: IndexedSeq[ActorRef[GuardianMessage]],
+                    oldGuardians: IndexedSeq[ActorRef[GuardianMessage]],
                     replyTo: ActorRef[GuardianMessage],
-                    joiner: ActorRef[StartEvent],
-                    selections:mutable.Queue[List[Int]] = mutable.Queue.empty,
-                    positions:mutable.Queue[List[Int]] = mutable.Queue.empty,
-                    identifiers:mutable.Queue[Int] = mutable.Queue.empty,
-                    criticalSectionRequests:mutable.Queue[CriticalSectionRequest] = mutable.Queue.empty,
+                    joiner: ActorRef[StartEvent]
                    ): Behavior[GuardianMessage] = {
 
+    var guardians: IndexedSeq[ActorRef[GuardianMessage]] = oldGuardians
+
+    val selections:mutable.Queue[List[Int]] = mutable.Queue.empty
+    val positions:mutable.Queue[List[Int]] = mutable.Queue.empty
+    val identifiers:mutable.Queue[Int] = mutable.Queue.empty
+    val criticalSectionRequests:mutable.Queue[CriticalSectionRequest] = mutable.Queue.empty
+
     player ! CutStarted()
+
     Behaviors.receiveMessage {
       case LocalStatus(selectionList, currentPositions) =>
         replyTo ! RemoteStatus(selectionList, currentPositions, id)
-        inCut(ctx, player, guardians, replyTo, joiner, selections, positions, identifiers)
+        Behaviors.same
 
       case RemoteStatus(selectionList, currentPositions, remoteId) =>
         selections append selectionList
@@ -175,21 +174,22 @@ object Guardian {
             guardian ! StopCut()
           }
         }
-        inCut(ctx, player, guardians, replyTo, joiner, selections, positions, identifiers)
+        Behaviors.same
 
       case StopCut() =>
         player ! CutFinished()
         for(request <- criticalSectionRequests) {
           ctx.self ! request
         }
-        inGame(ctx, player, guardians)
+        inGame(ctx, player)
 
       case CriticalSectionRequest(timestamp, replyToCS) =>
         criticalSectionRequests append CriticalSectionRequest(timestamp, replyToCS)
-        inCut(ctx, player, guardians, replyTo, joiner, selections, positions, identifiers)
+        Behaviors.same
 
       case GuardiansUpdated(newGuardians) =>
-        inCut(ctx, player, newGuardians.toIndexedSeq, replyTo, joiner, selections, positions, identifiers)
+        guardians = newGuardians.toIndexedSeq
+        Behaviors.same
     }
   }
 

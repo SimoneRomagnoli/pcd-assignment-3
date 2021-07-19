@@ -34,7 +34,7 @@ object JoinerActor2 {
       akka.remote.artery.canonical.port=$port
       akka.cluster.roles = [$role]
       """)
-      .withFallback(ConfigFactory.load("distributed_puzzle_info"))
+      .withFallback(ConfigFactory.load("distributed_puzzle"))
     ActorSystem[Nothing](RootBehavior(), "DistributedPuzzle", config)
   }
 

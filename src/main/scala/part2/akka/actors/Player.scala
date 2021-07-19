@@ -3,8 +3,8 @@ package part2.akka.actors
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import part2.akka.actors.Guardian.{GuardianMessage, LocalStatus, SelectionRequest}
+import part2.akka.board.Puzzle.{PuzzleBoard, PuzzleOptions}
 import part2.akka.board.Tiles.Tile
-import part2.akka.board.{PuzzleBoard, PuzzleOptions}
 
 import scala.collection.mutable
 
@@ -54,11 +54,11 @@ object Player {
     Behaviors.receiveMessage {
       case SelectedCell(currentPosition, timestamp) =>
         guardian ! SelectionRequest(currentPosition, timestamp)
-        inGame(ctx, puzzleBoard, guardian)
+        Behaviors.same
 
       case SelectedRemoteCell(selectedCurrentPosition, remoteId) =>
         puzzleBoard.remoteSelection(selectedCurrentPosition, remoteId)
-        inGame(ctx, puzzleBoard, guardian)
+        Behaviors.same
 
       case CutStarted() =>
         val currentPositions:List[Int] = puzzleBoard.tiles.sorted((a:Tile, b:Tile) => a.originalPosition-b.originalPosition).map(tile => tile.currentPosition)
@@ -73,22 +73,22 @@ object Player {
    * @param ctx, a reference to the actor's context
    * @param puzzleBoard, the gui
    * @param guardian, a reference to the local guardian
-   * @param messageQueue, a queue of incoming messages
    * @return the player's behavior during a system cut
    */
   private def inCut(ctx: ActorContext[PlayerMessage],
                     puzzleBoard: PuzzleBoard,
-                    guardian: ActorRef[GuardianMessage],
-                    messageQueue: mutable.Queue[SelectedCell] = mutable.Queue.empty
+                    guardian: ActorRef[GuardianMessage]
                     ): Behavior[PlayerMessage] = {
+
+    val messageQueue: mutable.Queue[SelectedCell] = mutable.Queue.empty
 
     Behaviors.receiveMessage {
       case CutStarted() =>
-        inCut(ctx, puzzleBoard, guardian, messageQueue)
+        Behaviors.same
 
       case SelectedCell(currentPosition, timestamp) =>
         messageQueue append SelectedCell(currentPosition, timestamp)
-        inCut(ctx, puzzleBoard, guardian, messageQueue)
+        Behaviors.same
 
       case CutFinished() =>
         for(message <- messageQueue) {
@@ -98,4 +98,4 @@ object Player {
     }
   }
 
-  }
+}

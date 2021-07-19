@@ -14,17 +14,6 @@ import java.awt.Color
  */
 object StarterActor {
 
-  /**
-   * Maps a player id to a unique color.
-   *
-   */
-  val playersToColors: Map[Int, Color] =
-    Map(
-      (1, Color.green), (2, Color.blue), (3, Color.red),
-      (4, Color.orange), (5, Color.magenta), (6, Color.yellow),
-      (7, Color.cyan), (8, Color.pink), (9, Color.darkGray)
-    )
-
   def main(args:Array[String]): Unit = {
     if(args.isEmpty) {
       startup(25251)
@@ -47,7 +36,7 @@ object StarterActor {
       akka.remote.artery.canonical.port=$port
       akka.cluster.roles = [$role]
       """)
-      .withFallback(ConfigFactory.load("distributed_puzzle_info"))
+      .withFallback(ConfigFactory.load("distributed_puzzle"))
     ActorSystem[Nothing](RootBehavior(), "DistributedPuzzle", config)
   }
 
