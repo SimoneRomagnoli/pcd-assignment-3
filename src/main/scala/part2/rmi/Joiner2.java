@@ -17,25 +17,18 @@ public class Joiner2 {
             //GET REMOTE REGISTRY
             Registry registry = LocateRegistry.getRegistry(Starter.REGISTRY_PORT);
 
-            //WATCH HOST LIST ON FIRST HOST
-            HostList remoteHostList = (HostList)registry.lookup("hostlist");
-            final int id = remoteHostList.getHostList().size()+1;
-
-            //CREATE LOCAL REGISTRY
-            final int port = Starter.REGISTRY_PORT + id - 1;
-            System.out.println("Starting with port "+port);
-            LocateRegistry.createRegistry(port);
-
-            //CREATE OWN HOST LIST
-            HostList remoteHostListStub = (HostList) UnicastRemoteObject.exportObject(remoteHostList, 0);
-            LocateRegistry.getRegistry(port).rebind("hostlist", remoteHostListStub);
-
             //CREATE OWN MODEL
-            BoardStatus remoteBoard = (BoardStatus) LocateRegistry.getRegistry(Starter.REGISTRY_PORT).lookup("boardStatus");
+            BoardStatus remoteBoard = (BoardStatus) registry.lookup("boardStatus");
             BoardStatus remoteBoardStub = (BoardStatus) UnicastRemoteObject.exportObject(remoteBoard, 0);
-            LocateRegistry.getRegistry(port).rebind("boardStatus", remoteBoardStub);
+            final int id = remoteBoard.getNextId();
+            final int port = Starter.REGISTRY_PORT + id - 1;
 
-            Controller controller = new Controller(id, remoteBoard, remoteHostList);
+            //CREATE OWN REGISTRY
+            LocateRegistry.createRegistry(port);
+            LocateRegistry.getRegistry(port).rebind("boardStatus", remoteBoardStub);
+            BoardStatus myBoard = (BoardStatus)LocateRegistry.getRegistry(port).lookup("boardStatus");
+
+            new Controller(id, myBoard);
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }

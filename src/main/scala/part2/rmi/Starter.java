@@ -27,10 +27,6 @@ public class Starter {
             //CREATE LOCAL REGISTRY
             LocateRegistry.createRegistry(REGISTRY_PORT);
 
-            //CREATE A HOST LIST
-            HostList hl = new HostListImpl();
-            HostList hlStub = (HostList) UnicastRemoteObject.exportObject(hl,0);
-
             //CREATE THE MODEL
             List<SerializableTile> emptyList = Stream.generate(() -> new SerializableTile(0,0, 0)).limit(ROWS*COLS).collect(Collectors.toList());
             BoardStatus board = new BoardStatusImpl(emptyList);
@@ -39,10 +35,8 @@ public class Starter {
             // Bind the remote object's stub in the registry
             Registry registry = LocateRegistry.getRegistry(REGISTRY_PORT);
             registry.rebind("boardStatus", boardStub);
-            registry.rebind("hostlist", hlStub);
 
-            System.out.println("Objects registered.");
-            Controller controller = new Controller(1, board, hl);
+            new Controller(1, board);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
