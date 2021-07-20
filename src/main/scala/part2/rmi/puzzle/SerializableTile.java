@@ -2,6 +2,10 @@ package part2.rmi.puzzle;
 
 import java.io.Serializable;
 
+/**
+ * Represents a tile of the puzzle board that can be read and updated by a remote object.
+ *
+ */
 public class SerializableTile implements Comparable<SerializableTile>, Serializable {
 
     private final int originalPosition;
@@ -22,7 +26,8 @@ public class SerializableTile implements Comparable<SerializableTile>, Serializa
         return currentPosition;
     }
 
-    public int getOriginalPosition(){ return originalPosition; }
+    public int getOriginalPosition() {
+        return originalPosition; }
 
     public void setCurrentPosition(final int newPosition) {
         currentPosition = newPosition;
@@ -36,7 +41,7 @@ public class SerializableTile implements Comparable<SerializableTile>, Serializa
         return this.selectedBy;
     }
 
-    public boolean alreadySelected(){
+    public boolean alreadySelected() {
         return this.selectedBy != 0;
     }
 
@@ -50,6 +55,6 @@ public class SerializableTile implements Comparable<SerializableTile>, Serializa
 
     @Override
     public String toString() {
-        return "[ORI: "+originalPosition+", CUR: "+currentPosition+", SEL: "+selectedBy+"]";
+        return "[ORIGINAL: "+originalPosition+", CURRENT: "+currentPosition+", SELECTED-BY: "+selectedBy+"]";
     }
 }

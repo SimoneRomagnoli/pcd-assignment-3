@@ -19,12 +19,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * The graphical user interface of the game.
+ * It is a local representation of the remote game.
+ *
+ */
 public class PuzzleBoard extends JFrame {
 
     private final static Map<Integer, Color> COLORS = Map.of(
                 1, Color.green, 2, Color.blue, 3, Color.red,
                 4, Color.orange, 5, Color.magenta, 6, Color.yellow,
-                7, Color.cyan, 8, Color.pink, 9, Color.darkGray
+                7, Color.cyan, 8, Color.pink, 9, Color.darkGray, 0, Color.lightGray
             );
 
 
@@ -50,6 +55,38 @@ public class PuzzleBoard extends JFrame {
         board.setLayout(new GridLayout(rows, cols, 0, 0));
         this.getContentPane().add(board, "Center");
         this.createTiles();
+    }
+
+    /**
+     * Updates a board with the current global state.
+     *
+     * @throws RemoteException if the node is unreachable
+     */
+    public void updateBoard() throws RemoteException {
+        List<SerializableTile> serializableTiles = controller.getSerializableTiles();
+
+        for(Tile tile: this.tiles) {
+            final SerializableTile twinTile = serializableTiles
+                    .stream()
+                    .filter(t -> t.getOriginalPosition() == tile.getOriginalPosition())
+                    .collect(Collectors.toList())
+                    .get(0);
+
+            tile.setCurrentPosition(twinTile.getCurrentPosition());
+            tile.select(twinTile.getSelection());
+        }
+
+        paintPuzzle();
+        checkSolution();
+    }
+
+    /**
+     * Get the current local state of the tiles.
+     *
+     * @return the current tiles in the local board
+     */
+    public List<SerializableTile> getSerializableTiles(){
+        return tiles.stream().map(Tile::getSerializableTile).collect(Collectors.toList());
     }
 
     private void createTiles(){
@@ -96,7 +133,7 @@ public class PuzzleBoard extends JFrame {
             TileButton btn = new TileButton(tile);
             this.board.add(btn);
             final int id = tile.getSelection();
-            btn.setBorder(BorderFactory.createLineBorder(id == 0 ? Color.GRAY : COLORS.get(id), 3));
+            btn.setBorder(BorderFactory.createLineBorder(id == 0 ? Color.GRAY : COLORS.get(id % 10), 3));
             btn.addActionListener((actionListener) -> {
                 if(!tile.alreadySelected()){
                     try {
@@ -115,27 +152,5 @@ public class PuzzleBoard extends JFrame {
             SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Puzzle Completed!", "", JOptionPane.INFORMATION_MESSAGE));
         }
 
-    }
-
-    public void updateBoard() throws RemoteException {
-        List<SerializableTile> serializableTiles = controller.getSerializableTiles();
-
-        for(Tile tile: this.tiles) {
-            final SerializableTile twinTile = serializableTiles
-                    .stream()
-                    .filter(t -> t.getOriginalPosition() == tile.getOriginalPosition())
-                    .collect(Collectors.toList())
-                    .get(0);
-
-            tile.setCurrentPosition(twinTile.getCurrentPosition());
-            tile.select(twinTile.getSelection());
-        }
-
-        paintPuzzle();
-        checkSolution();
-    }
-
-    public List<SerializableTile> getSerializableTiles(){
-        return tiles.stream().map(Tile::getSerializableTile).collect(Collectors.toList());
     }
 }

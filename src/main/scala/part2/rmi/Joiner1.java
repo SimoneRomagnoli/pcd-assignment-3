@@ -9,6 +9,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ * First player to join a game.
+ *
+ */
 public class Joiner1 {
 
     public static void main(String[] args) {
@@ -17,15 +21,15 @@ public class Joiner1 {
             Registry registry = LocateRegistry.getRegistry(Starter.REGISTRY_PORT);
 
             //CREATE OWN MODEL
-            BoardStatus remoteBoard = (BoardStatus) registry.lookup("boardStatus");
-            BoardStatus remoteBoardStub = (BoardStatus) UnicastRemoteObject.exportObject(remoteBoard, 0);
+            RemoteBoard remoteBoard = (RemoteBoard) registry.lookup("boardStatus");
+            RemoteBoard remoteBoardStub = (RemoteBoard) UnicastRemoteObject.exportObject(remoteBoard, 0);
             final int id = remoteBoard.getNextId();
             final int port = Starter.REGISTRY_PORT + id - 1;
 
             //CREATE OWN REGISTRY
             LocateRegistry.createRegistry(port);
             LocateRegistry.getRegistry(port).rebind("boardStatus", remoteBoardStub);
-            BoardStatus myBoard = (BoardStatus)LocateRegistry.getRegistry(port).lookup("boardStatus");
+            RemoteBoard myBoard = (RemoteBoard)LocateRegistry.getRegistry(port).lookup("boardStatus");
 
             new Controller(id, myBoard);
         } catch (RemoteException | NotBoundException e) {

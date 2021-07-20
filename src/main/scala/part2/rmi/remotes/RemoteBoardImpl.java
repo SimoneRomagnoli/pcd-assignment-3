@@ -6,13 +6,17 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class BoardStatusImpl implements BoardStatus {
+/**
+ * Class that implements a remote board, distributed among several nodes
+ *
+ */
+public class RemoteBoardImpl implements RemoteBoard {
 
     private List<SerializableTile> tiles;
 
     private Map<RemoteObserver, Integer> observers;
 
-    public BoardStatusImpl(List<SerializableTile> tiles) {
+    public RemoteBoardImpl(List<SerializableTile> tiles) {
         this.tiles = tiles;
         this.observers = new HashMap<>();
     }
@@ -54,7 +58,7 @@ public class BoardStatusImpl implements BoardStatus {
     }
 
     @Override
-    public List<SerializableTile> getTiles() {
+    public synchronized List<SerializableTile> getTiles() {
         return this.tiles;
     }
 
@@ -64,13 +68,13 @@ public class BoardStatusImpl implements BoardStatus {
     }
 
     @Override
-    public int getNextId() throws RemoteException {
-        return observers.values().stream().max(Comparator.comparingInt(a -> a)).orElse(0)+1;
+    public void loadCurrentTiles(List<SerializableTile> currentTiles) {
+        this.tiles = new ArrayList<>(currentTiles);
     }
 
     @Override
-    public void loadCurrentTiles(List<SerializableTile> currentTiles) {
-        this.tiles = new ArrayList<>(currentTiles);
+    public int getNextId() throws RemoteException {
+        return observers.values().stream().max(Comparator.comparingInt(a -> a)).orElse(0)+1;
     }
 
     private void swap(SerializableTile t1, SerializableTile t2) {
