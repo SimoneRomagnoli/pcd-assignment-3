@@ -33,7 +33,7 @@ public class Starter {
 
             //CREATE THE MODEL
             List<SerializableTile> emptyList = Stream.generate(() -> new SerializableTile(0,0, 0)).limit(ROWS*COLS).collect(Collectors.toList());
-            BoardStatus board = new BoardStatusImpl(emptyList, 1);
+            BoardStatus board = new BoardStatusImpl(emptyList);
             BoardStatus boardStub = (BoardStatus) UnicastRemoteObject.exportObject(board, 0);
 
             // Bind the remote object's stub in the registry

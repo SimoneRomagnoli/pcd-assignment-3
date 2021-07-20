@@ -12,6 +12,7 @@ import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
 import java.io.File;
 import java.io.IOException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.List;
@@ -97,11 +98,10 @@ public class PuzzleBoard extends JFrame {
             final int id = tile.getSelection();
             btn.setBorder(BorderFactory.createLineBorder(id == 0 ? Color.GRAY : COLORS.get(id), 3));
             btn.addActionListener((actionListener) -> {
-                // Solo se la tile non è già selezionata
                 if(!tile.alreadySelected()){
                     try {
                         this.controller.select(tile.getSerializableTile());
-                    } catch (RemoteException e) {
+                    } catch (RemoteException | NotBoundException e) {
                         e.printStackTrace();
                     }
                 }

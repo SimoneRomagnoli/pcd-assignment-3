@@ -15,38 +15,33 @@ import java.util.stream.Collectors;
 
 public class Propagator implements Serializable {
 
-    public static final int BASE_PORT = 1098;
-    public static final String HOST_LIST = "hostlist";
-    public static final String BOARD = "boardStatus";
+    private static final int BASE_PORT = 1098;
+    private static final String HOST_LIST = "hostlist";
+    private static final String BOARD = "boardStatus";
 
-    private final HostList hostlist;
-    private final BoardStatus board;
+    private final List<RemoteHost> remoteHosts;
 
     private final int id;
 
-    public Propagator(int id, HostList hostlist, BoardStatus board) {
-        this.hostlist = hostlist;
-        this.board = board;
+    public Propagator(int id, List<RemoteHost> remoteHosts) {
+        this.remoteHosts = remoteHosts;
         this.id = id;
     }
 
-    public void propagate() {
+    public void propagate() throws RemoteException, NotBoundException {
         List<RemoteHost> reachableHosts = reachableHosts();
+        Registry localRegistry = LocateRegistry.getRegistry(BASE_PORT+this.id);
+        HostList hostlist = (HostList) localRegistry.lookup(HOST_LIST);
+        BoardStatus board = (BoardStatus) localRegistry.lookup(BOARD);
 
         for (RemoteHost host : reachableHosts) {
             if(host.getId() != this.id) {
                 try {
                     final int port = BASE_PORT + host.getId();
                     Registry registry = LocateRegistry.getRegistry(port);
-
-                    //PROPAGATE BOARD
-                    BoardStatus remoteBoardStatus = (BoardStatus) registry.lookup(BOARD);
-                    remoteBoardStatus.remoteUpdate(board.getTiles());
-
-                    //PROPAGATE HOST LIST
-                    HostList remoteHostlist = (HostList) registry.lookup(HOST_LIST);
-                    remoteHostlist.remoteUpdate(hostlist.getHostList());
-                } catch (RemoteException | NotBoundException e) {
+                    registry.rebind(HOST_LIST, hostlist);
+                    registry.rebind(BOARD, board);
+                } catch (RemoteException e) {
                     e.printStackTrace();
                 }
             }
@@ -54,16 +49,8 @@ public class Propagator implements Serializable {
     }
 
     private List<RemoteHost> reachableHosts() {
-        List<RemoteHost> hosts = new ArrayList<>();
-        try {
-            hosts = hostlist.getHostList();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-
-        flagUnreachableHosts(hosts);
-
-        return hosts.stream().filter(RemoteHost::isReachable).collect(Collectors.toList());
+        flagUnreachableHosts(this.remoteHosts);
+        return this.remoteHosts.stream().filter(RemoteHost::isReachable).collect(Collectors.toList());
     }
 
     private void flagUnreachableHosts(List<RemoteHost> hosts) {

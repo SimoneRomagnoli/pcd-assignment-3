@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="ISO-8859-1"?><pnml>
+    <net id="Net-One" type="P/T net">
+        <token id="CriticalSection" enabled="true" red="0" green="255" blue="0"/>
+        <token id="Guardian" enabled="true" red="0" green="0" blue="255"/>
+        <token id="Gui" enabled="true" red="0" green="0" blue="0"/>
+        <token id="Player" enabled="true" red="255" green="0" blue="0"/>
+        <token id="Selection" enabled="true" red="253" green="54" blue="201"/>
+        <labels x="769" y="237" width="195" height="89" border="true">
+            <text>BLACK = GUI EVENT
+RED = PLAYER
+BLUE = GUARDIAN
+GREEN = CS MESSAGE
+PINK = SELECTION MESSAGE</text>
+        </labels>
+        <place id="CS OK">
+            <graphics>
+                <position x="690.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>CS OK</value>
+                <graphics>
+                    <offset x="-2.0" y="4.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>CriticalSection,0,Guardian,0,Gui,0,Player,0,Selection,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="CS REQUEST">
+            <graphics>
+                <position x="330.0" y="150.0"/>
+            </graphics>
+            <name>
+                <value>CS REQUEST</value>
+                <graphics>
+                    <offset x="13.0" y="-13.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>Guardian,0,Player,0,CriticalSection,0,Gui,0,Selection,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="GUARDIAN IN GAME">
+            <graphics>
+                <position x="420.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>GUARDIAN IN GAME</value>
+                <graphics>
+                    <offset x="140.0" y="-7.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>Player,0,Guardian,1,CriticalSection,0,Gui,0,Selection,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="OTHER GUARDIANS">
+            <graphics>
+                <position x="570.0" y="150.0"/>
+            </graphics>
+            <name>
+                <value>OTHER GUARDIANS</value>
+                <graphics>
+                    <offset x="14.0" y="-9.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>Guardian,5,Player,0,CriticalSection,0,Gui,0,Selection,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="PLAYER IN GAME">
+            <graphics>
+                <position x="210.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>PLAYER IN GAME</value>
+                <graphics>
+                    <offset x="1.0" y="11.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>Gui,0,Player,1,Guardian,0,CriticalSection,0,Selection,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <transition id="click()">
+            <graphics>
+                <position x="210.0" y="150.0"/>
+            </graphics>
+            <name>
+                <value>click()</value>
+                <graphics>
+                    <offset x="-5.0" y="35.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="sendCSRequest()">
+            <graphics>
+                <position x="420.0" y="150.0"/>
+            </graphics>
+            <name>
+                <value>sendCSRequest()</value>
+                <graphics>
+                    <offset x="32.0" y="-19.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="sendOkReply()">
+            <graphics>
+                <position x="690.0" y="150.0"/>
+            </graphics>
+            <name>
+                <value>sendOkReply()</value>
+                <graphics>
+                    <offset x="91.0" y="41.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="sendSelection()">
+            <graphics>
+                <position x="570.0" y="315.0"/>
+            </graphics>
+            <name>
+                <value>sendSelection()</value>
+                <graphics>
+                    <offset x="87.0" y="-8.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="userSelection()">
+            <graphics>
+                <position x="330.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>userSelection()</value>
+                <graphics>
+                    <offset x="13.0" y="-10.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <arc id="click() to PLAYER IN GAME" source="click()" target="PLAYER IN GAME">
+            <graphics/>
+            <inscription>
+                <value>Gui,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="222" y="177" curvePoint="false"/>
+            <arcpath id="001" x="222" y="237" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="CS REQUEST to sendCSRequest()" source="CS REQUEST" target="sendCSRequest()">
+            <graphics/>
+            <inscription>
+                <value>Guardian,1,Player,0,CriticalSection,0,Gui,0,Selection,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="356" y="162" curvePoint="false"/>
+            <arcpath id="001" x="426" y="163" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="GUARDIAN IN GAME to sendSelection()" source="GUARDIAN IN GAME" target="sendSelection()">
+            <graphics/>
+            <inscription>
+                <value>Guardian,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="432" y="267" curvePoint="false"/>
+            <arcpath id="001" x="432" y="372" curvePoint="false"/>
+            <arcpath id="002" x="582" y="372" curvePoint="false"/>
+            <arcpath id="003" x="582" y="342" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="GUARDIAN IN GAME to userSelection()" source="GUARDIAN IN GAME" target="userSelection()">
+            <graphics/>
+            <inscription>
+                <value>Guardian,1,Player,0,CriticalSection,0,Gui,0,Selection,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="417" y="252" curvePoint="false"/>
+            <arcpath id="001" x="346" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="sendCSRequest() to GUARDIAN IN GAME" source="sendCSRequest()" target="GUARDIAN IN GAME">
+            <graphics/>
+            <inscription>
+                <value>Guardian,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="432" y="177" curvePoint="false"/>
+            <arcpath id="001" x="432" y="237" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="sendOkReply() to CS OK" source="sendOkReply()" target="CS OK">
+            <graphics/>
+            <inscription>
+                <value>CriticalSection,1,Gui,0,Player,0,Guardian,0,Selection,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="702" y="177" curvePoint="false"/>
+            <arcpath id="001" x="702" y="237" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="sendOkReply() to OTHER GUARDIANS" source="sendOkReply()" target="OTHER GUARDIANS">
+            <graphics/>
+            <inscription>
+                <value>Guardian,1,Gui,0,Player,0,CriticalSection,0,Selection,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="703" y="147" curvePoint="false"/>
+            <arcpath id="001" x="702" y="102" curvePoint="false"/>
+            <arcpath id="002" x="582" y="102" curvePoint="false"/>
+            <arcpath id="003" x="582" y="147" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="sendSelection() to GUARDIAN IN GAME" source="sendSelection()" target="GUARDIAN IN GAME">
+            <graphics/>
+            <inscription>
+                <value>Guardian,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="576" y="328" curvePoint="false"/>
+            <arcpath id="001" x="522" y="327" curvePoint="false"/>
+            <arcpath id="002" x="522" y="252" curvePoint="false"/>
+            <arcpath id="003" x="447" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="sendSelection() to OTHER GUARDIANS" source="sendSelection()" target="OTHER GUARDIANS">
+            <graphics/>
+            <inscription>
+                <value>Selection,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="583" y="312" curvePoint="false"/>
+            <arcpath id="001" x="582" y="176" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="userSelection() to CS REQUEST" source="userSelection()" target="CS REQUEST">
+            <graphics/>
+            <inscription>
+                <value>Guardian,1,Player,0,CriticalSection,0,Gui,0,Selection,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="343" y="237" curvePoint="false"/>
+            <arcpath id="001" x="342" y="176" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="userSelection() to PLAYER IN GAME" source="userSelection()" target="PLAYER IN GAME">
+            <graphics/>
+            <inscription>
+                <value>Player,1,Gui,0,Guardian,0,CriticalSection,0,Selection,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="342" y="267" curvePoint="false"/>
+            <arcpath id="001" x="342" y="342" curvePoint="false"/>
+            <arcpath id="002" x="222" y="342" curvePoint="false"/>
+            <arcpath id="003" x="222" y="267" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+    </net>
+</pnml>

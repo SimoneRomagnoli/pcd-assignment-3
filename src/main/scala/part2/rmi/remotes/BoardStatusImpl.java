@@ -1,6 +1,6 @@
 package part2.rmi.remotes;
 
-import part2.rmi.controller.Propagator;
+import javafx.beans.Observable;
 import part2.rmi.puzzle.SerializableTile;
 
 import java.rmi.RemoteException;
@@ -12,26 +12,17 @@ import java.util.stream.Collectors;
 public class BoardStatusImpl implements BoardStatus {
 
     private List<SerializableTile> tiles;
-    private final Integer id;
+    private List<RemoteObserver> observers;
 
-    private Propagator propagator;
-    private LocalObserver observer;
-
-    private boolean mySelectionActive = false;
-
-
-    public BoardStatusImpl(List<SerializableTile> tiles, Integer id) {
+    public BoardStatusImpl(List<SerializableTile> tiles) {
         this.tiles = tiles;
-        this.id = id;
+        this.observers = new ArrayList<>();
     }
 
-
-
-    public void select(SerializableTile selectedTile) {
-        if(mySelectionActive) {
-            mySelectionActive = false;
+    public void select(SerializableTile selectedTile, int id) {
+        if(tiles.stream().anyMatch(tile -> tile.getSelection() == id)) {
             SerializableTile firstTile = tiles.stream()
-                    .filter(t->t.getSelection() == this.id)
+                    .filter(t->t.getSelection() == id)
                     .collect(Collectors.toList())
                     .get(0);
 
@@ -39,27 +30,25 @@ public class BoardStatusImpl implements BoardStatus {
                     .filter(t->t.getCurrentPosition() == selectedTile.getCurrentPosition())
                     .collect(Collectors.toList())
                     .get(0);
-            firstTile.unselect();
 
+            firstTile.unselect();
             swap(firstTile, secondTile);
         } else {
-            mySelectionActive = true;
-
             tiles.stream()
                     .filter(t->t.getCurrentPosition() == selectedTile.getCurrentPosition())
                     .collect(Collectors.toList())
                     .get(0)
-                    .select(this.id);
+                    .select(id);
         }
-        Collections.sort(this.tiles);
-        this.propagator.propagate();
-        this.observer.update();
-    }
 
-    @Override
-    public void remoteUpdate(List<SerializableTile> remoteTiles) throws RemoteException {
-        this.tiles = new ArrayList<>(remoteTiles);
-        this.observer.update();
+        Collections.sort(this.tiles);
+        for(RemoteObserver ro: observers) {
+            try {
+                ro.update();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void swap(SerializableTile t1, SerializableTile t2) {
@@ -68,11 +57,12 @@ public class BoardStatusImpl implements BoardStatus {
         t2.setCurrentPosition(pos);
     }
 
-
-
     @Override
-    public void setLocalObserver(LocalObserver localObserver) throws RemoteException {
-        this.observer = localObserver;
+    public void addRemoteObserver(RemoteObserver remoteObserver) throws RemoteException {
+        observers.add(remoteObserver);
+        for(RemoteObserver ro: observers) {
+            ro.updateRemoteObservers(observers);
+        }
     }
 
     @Override
@@ -85,8 +75,4 @@ public class BoardStatusImpl implements BoardStatus {
         this.tiles = new ArrayList<>(currentTiles);
     }
 
-    @Override
-    public void setPropagator(Propagator propagator) throws RemoteException {
-        this.propagator = propagator;
-    }
 }

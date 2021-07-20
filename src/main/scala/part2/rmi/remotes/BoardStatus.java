@@ -2,16 +2,15 @@ package part2.rmi.remotes;
 
 import part2.rmi.puzzle.SerializableTile;
 
+import java.rmi.Remote;
 import java.util.List;
 import java.rmi.RemoteException;
 
-public interface BoardStatus extends RemoteObject {
+public interface BoardStatus extends Remote {
 
-    void select(SerializableTile tile) throws RemoteException;
+    void select(SerializableTile tile, int id) throws RemoteException;
 
-    void remoteUpdate(List<SerializableTile> tiles) throws RemoteException;
-
-    void setLocalObserver(LocalObserver localObserver) throws RemoteException;
+    void addRemoteObserver(RemoteObserver remoteObserver) throws RemoteException;
 
     void loadCurrentTiles(List<SerializableTile> currentTiles) throws RemoteException;
 
