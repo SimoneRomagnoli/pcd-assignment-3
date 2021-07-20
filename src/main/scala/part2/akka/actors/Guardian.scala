@@ -77,6 +77,9 @@ object Guardian {
 
     Behaviors.receiveMessage {
       case GuardiansUpdated(newGuardians) =>
+        if(newGuardians.size < guardians.size) {
+          //avvisare tutti del nodo down, togliere il tassello colorato
+        }
         guardians = newGuardians.toIndexedSeq
         Behaviors.same
 
