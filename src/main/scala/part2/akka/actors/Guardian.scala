@@ -228,6 +228,10 @@ object Guardian {
       case RemovePlayers(identifiers) =>
         messageQueue append RemovePlayers(identifiers)
         Behaviors.same
+
+      case RemoteSelection(currentPosition, id) =>
+        player ! SelectedRemoteCell(currentPosition, id)
+        Behaviors.same
     }
   }
 

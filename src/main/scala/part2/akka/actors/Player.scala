@@ -96,6 +96,10 @@ object Player {
         messageQueue append SelectedCell(currentPosition, timestamp)
         Behaviors.same
 
+      case SelectedRemoteCell(selectedCurrentPosition, remoteId) =>
+        puzzleBoard.remoteSelection(selectedCurrentPosition, remoteId)
+        Behaviors.same
+
       case RemovePlayer(id) =>
         messageQueue append RemovePlayer(id)
         Behaviors.same
