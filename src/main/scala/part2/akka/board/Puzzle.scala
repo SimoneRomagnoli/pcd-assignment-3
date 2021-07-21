@@ -38,8 +38,6 @@ object Puzzle {
    * @param tiles                        , list of tiles in the board
    */
   case class PuzzleBoard(localId: Int, rows: Int, cols: Int, starter: Boolean, currentPositions: List[Int], var selectionList: List[Int], player: ActorRef[PlayerMessage], var tiles: List[Tile] = List()) extends JFrame {
-
-
     setTitle("Puzzle")
     setResizable(false)
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
@@ -151,6 +149,18 @@ object Puzzle {
         }
         paintPuzzle()
         checkSolution()
+      }
+    }
+
+    /**
+     * Unselect all tiles that are selected by the specified unreachable player.
+     *
+     * @param id, the id of the unreachable player
+     */
+    def unselectAll(id: Int): Unit = {
+      if(selectionList.contains(id)) {
+        selectionList = selectionList.patch(selectionList.indexOf(id), Seq(0), 1)
+        paintPuzzle()
       }
     }
 

@@ -64,6 +64,8 @@ object Valid {
  *
  */
 object Stripper {
+  val CHUNK_SIZE:Int = 10
+
   def apply(counter:ActorRef[Text]): Behavior[Pdf] = {
     Behaviors.receive { (ctx, msg) =>
       ctx.log.info(s"Received document ${msg.title}")
@@ -85,9 +87,9 @@ object StripperChild {
     ctx.log.info(s"Start stripping document ${msg.title}")
     val stripper = new PDFTextStripper
 
-    for(i <- 1 to msg.document.getNumberOfPages) {
-      stripper.setStartPage(i)
-      stripper.setEndPage(i)
+    for(i <- 0 until msg.document.getNumberOfPages / Stripper.CHUNK_SIZE) {
+      stripper.setStartPage((i*Stripper.CHUNK_SIZE)+1)
+      stripper.setEndPage(Math.min((i+1)*Stripper.CHUNK_SIZE, msg.document.getNumberOfPages))
       stripper.setSortByPosition(true)
       counter ! Text(stripper.getText(msg.document), msg.title+" - "+i)
     }
@@ -108,7 +110,7 @@ object Counter {
   val REGEX = "[^a-zA-Z0-9]"
 
   def apply(ignoredWords:List[String], gatherer: ActorRef[Occurrences]): Behavior[Text] = Behaviors.receive { (ctx, msg) =>
-    ctx.log.info(s"Start processing raw text of document ${msg.title}")
+    //ctx.log.info(s"Start processing raw text of document ${msg.title}")
     var occurrences: Map[String, Int] = Map()
     for(word <- msg.text.split(REGEX).filter(word => !ignoredWords.contains(word))) {
       if(occurrences.contains(word)) {
@@ -133,17 +135,20 @@ object Gatherer {
   var globalOccurrences:Map[String, Int] = Map()
   var elaboratedWords:Int = 0
   var totalPages:Int = 0
+  var chunksToReceive:Int = 0
   var receivedMessages:Int = 0
 
   def apply(limit: Int, controller: Controller): Behavior[Output] = {
     globalOccurrences = Map()
     elaboratedWords = 0
     totalPages = 0
+    chunksToReceive = 0
     receivedMessages = 0
 
     Behaviors.receiveMessage {
       case Pages(numberOfPages) =>
         totalPages += numberOfPages
+        chunksToReceive += (numberOfPages / Stripper.CHUNK_SIZE) + (if(numberOfPages % Stripper.CHUNK_SIZE==0) 0 else 1)
         Behaviors.same
       case Occurrences(occurrences, words, _) =>
         receivedMessages += 1
@@ -161,7 +166,7 @@ object Gatherer {
           .sorted((a:String,b:String) => globalOccurrences(b) - globalOccurrences(a))
           .take(limit)
           .map((k:String) => k -> Integer.valueOf(globalOccurrences(k))).toMap)
-        if(receivedMessages >= totalPages) {
+        if(receivedMessages >= chunksToReceive) {
           Behaviors.stopped
         } else {
           Behaviors.same

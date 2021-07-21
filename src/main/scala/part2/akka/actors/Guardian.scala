@@ -3,8 +3,8 @@ package part2.akka.actors
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
-import part2.akka.actors.Player.{CutFinished, CutStarted, PlayerMessage, SelectedRemoteCell}
-import part2.akka.actors.StartBehaviors.Joiner.{GuardianReference, GlobalStatus}
+import part2.akka.actors.Player.{CutFinished, CutStarted, PlayerMessage, RemovePlayer, SelectedRemoteCell}
+import part2.akka.actors.StartBehaviors.Joiner.{GlobalStatus, GuardianReference}
 import part2.akka.actors.StartBehaviors.{Joiner, StartEvent}
 
 import scala.collection.mutable
@@ -33,6 +33,9 @@ object Guardian {
   final case class LocalStatus(selectionList:List[Int], currentPositions:List[Int]) extends GuardianMessage with CborSerializable
   final case class RemoteStatus(selectionList:List[Int], currentPositions:List[Int], remoteId:Int) extends GuardianMessage with CborSerializable
   final case class StopCut() extends GuardianMessage with CborSerializable
+
+  //FAILURES
+  final case class RemovePlayers(identifiers: List[Int]) extends GuardianMessage with CborSerializable
 
   //RECEPTIONIST UPDATES
   private final case class GuardiansUpdated(newGuardians: Set[ActorRef[GuardianMessage]]) extends GuardianMessage
@@ -78,9 +81,21 @@ object Guardian {
     Behaviors.receiveMessage {
       case GuardiansUpdated(newGuardians) =>
         if(newGuardians.size < guardians.size) {
-          //avvisare tutti del nodo down, togliere il tassello colorato
+          var toBeRemoved: List[Int] = List()
+          for(guardian <- guardians; if !newGuardians.map(g => g.path.name).contains(guardian.path.name)) {
+            toBeRemoved = toBeRemoved appended guardian.path.name.replace("guardian", "").toInt
+          }
+          for(newGuardian <- newGuardians) {
+            newGuardian ! RemovePlayers(toBeRemoved)
+          }
         }
         guardians = newGuardians.toIndexedSeq
+        Behaviors.same
+
+      case RemovePlayers(identifiers) =>
+        for(id <- identifiers) {
+          player ! RemovePlayer(id)
+        }
         Behaviors.same
 
       case JoinersUpdated(joiners) =>
@@ -161,7 +176,7 @@ object Guardian {
     val selections:mutable.Queue[List[Int]] = mutable.Queue.empty
     val positions:mutable.Queue[List[Int]] = mutable.Queue.empty
     val identifiers:mutable.Queue[Int] = mutable.Queue.empty
-    val criticalSectionRequests:mutable.Queue[CriticalSectionRequest] = mutable.Queue.empty
+    val messageQueue:mutable.Queue[GuardianMessage] = mutable.Queue.empty
 
     player ! CutStarted()
 
@@ -188,17 +203,30 @@ object Guardian {
 
       case StopCut() =>
         player ! CutFinished()
-        for(request <- criticalSectionRequests) {
-          ctx.self ! request
+        for(msg <- messageQueue) {
+          ctx.self ! msg
         }
         inGame(ctx, player)
 
       case CriticalSectionRequest(timestamp, replyToCS) =>
-        criticalSectionRequests append CriticalSectionRequest(timestamp, replyToCS)
+        messageQueue append CriticalSectionRequest(timestamp, replyToCS)
         Behaviors.same
 
       case GuardiansUpdated(newGuardians) =>
+        if(newGuardians.size < guardians.size) {
+          var toBeRemoved: List[Int] = List()
+          for(guardian <- guardians; if !newGuardians.map(g => g.path.name).contains(guardian.path.name)) {
+            toBeRemoved = toBeRemoved appended guardian.path.name.replace("guardian", "").toInt
+          }
+          for(newGuardian <- newGuardians) {
+            newGuardian ! RemovePlayers(toBeRemoved)
+          }
+        }
         guardians = newGuardians.toIndexedSeq
+        Behaviors.same
+
+      case RemovePlayers(identifiers) =>
+        messageQueue append RemovePlayers(identifiers)
         Behaviors.same
     }
   }

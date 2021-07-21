@@ -20,6 +20,8 @@ object Player {
   final case class SelectedCell(currentPosition: Int, timestamp:Double) extends PlayerMessage with CborSerializable
   final case class SelectedRemoteCell(id: Int, selectedCurrentPosition: Int) extends PlayerMessage with CborSerializable
 
+  final case class RemovePlayer(id: Int) extends PlayerMessage with CborSerializable
+
   final case class CutStarted() extends PlayerMessage with CborSerializable
   final case class CutFinished() extends PlayerMessage with CborSerializable
 
@@ -29,7 +31,7 @@ object Player {
     this.id = id
 
     val guardian =
-      ctx.spawn(Guardian(id, ctx.self), "selectionGuardian")
+      ctx.spawn(Guardian(id, ctx.self), s"guardian$id")
 
     val puzzleBoard: PuzzleBoard =
       PuzzleBoard(id, puzzleOptions.rows, puzzleOptions.cols, puzzleOptions.starter,
@@ -60,6 +62,10 @@ object Player {
         puzzleBoard.remoteSelection(selectedCurrentPosition, remoteId)
         Behaviors.same
 
+      case RemovePlayer(id) =>
+        puzzleBoard.unselectAll(id)
+        Behaviors.same
+
       case CutStarted() =>
         val currentPositions:List[Int] = puzzleBoard.tiles.sorted((a:Tile, b:Tile) => a.originalPosition-b.originalPosition).map(tile => tile.currentPosition)
         guardian ! LocalStatus(puzzleBoard.selectionList, currentPositions)
@@ -80,7 +86,7 @@ object Player {
                     guardian: ActorRef[GuardianMessage]
                     ): Behavior[PlayerMessage] = {
 
-    val messageQueue: mutable.Queue[SelectedCell] = mutable.Queue.empty
+    val messageQueue: mutable.Queue[PlayerMessage] = mutable.Queue.empty
 
     Behaviors.receiveMessage {
       case CutStarted() =>
@@ -88,6 +94,10 @@ object Player {
 
       case SelectedCell(currentPosition, timestamp) =>
         messageQueue append SelectedCell(currentPosition, timestamp)
+        Behaviors.same
+
+      case RemovePlayer(id) =>
+        messageQueue append RemovePlayer(id)
         Behaviors.same
 
       case CutFinished() =>
