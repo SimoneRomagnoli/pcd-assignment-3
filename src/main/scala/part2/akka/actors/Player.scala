@@ -17,7 +17,7 @@ object Player {
 
   sealed trait PlayerMessage
 
-  final case class SelectedCell(currentPosition: Int, timestamp:Double) extends PlayerMessage with CborSerializable
+  final case class SelectedCell(currentPosition: Int) extends PlayerMessage with CborSerializable
   final case class SelectedRemoteCell(id: Int, selectedCurrentPosition: Int) extends PlayerMessage with CborSerializable
 
   final case class RemovePlayer(id: Int) extends PlayerMessage with CborSerializable
@@ -54,8 +54,8 @@ object Player {
                      ): Behavior[PlayerMessage] = {
 
     Behaviors.receiveMessage {
-      case SelectedCell(currentPosition, timestamp) =>
-        guardian ! SelectionRequest(currentPosition, timestamp)
+      case SelectedCell(currentPosition) =>
+        guardian ! SelectionRequest(currentPosition)
         Behaviors.same
 
       case SelectedRemoteCell(selectedCurrentPosition, remoteId) =>
@@ -92,8 +92,8 @@ object Player {
       case CutStarted() =>
         Behaviors.same
 
-      case SelectedCell(currentPosition, timestamp) =>
-        messageQueue append SelectedCell(currentPosition, timestamp)
+      case SelectedCell(currentPosition) =>
+        messageQueue append SelectedCell(currentPosition)
         Behaviors.same
 
       case SelectedRemoteCell(selectedCurrentPosition, remoteId) =>

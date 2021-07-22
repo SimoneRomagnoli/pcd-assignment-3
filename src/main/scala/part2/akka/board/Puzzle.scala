@@ -118,8 +118,7 @@ object Puzzle {
           btn.setBorder(BorderFactory.createLineBorder(color, 3))
           btn.addActionListener(_ => {
             if (selectionList(index) == 0) {
-              val timestamp: Double = System.currentTimeMillis()
-              player ! SelectedCell(tile.currentPosition, timestamp)
+              player ! SelectedCell(tile.currentPosition)
             }
           })
       }

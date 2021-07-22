@@ -20,11 +20,11 @@ object Guardian {
   sealed trait GuardianMessage
 
   //SELECTION MESSAGES
-  final case class SelectionRequest(currentPosition:Int, timestamp:Double) extends GuardianMessage with CborSerializable
+  final case class SelectionRequest(currentPosition:Int) extends GuardianMessage with CborSerializable
   final case class RemoteSelection(currentPosition: Int, id:Int) extends GuardianMessage with CborSerializable
 
   //CRITICAL SECTION MESSAGES
-  final case class CriticalSectionRequest(timestamp: Double, replyTo:ActorRef[GuardianMessage]) extends GuardianMessage with CborSerializable
+  final case class CriticalSectionRequest(timestamp: Int, replyTo:ActorRef[GuardianMessage], remoteId:Int) extends GuardianMessage with CborSerializable
   final case class CriticalSectionOK(remoteId:Int) extends GuardianMessage with CborSerializable
 
   //CUT MESSAGES
@@ -71,12 +71,13 @@ object Guardian {
    * @param player, a reference to the player
    * @return the guardian behavior
    */
-  private def inGame(ctx: ActorContext[GuardianMessage], player: ActorRef[PlayerMessage]): Behavior[GuardianMessage] = {
+  private def inGame(ctx: ActorContext[GuardianMessage], player: ActorRef[PlayerMessage], initialClock:Int = 0): Behavior[GuardianMessage] = {
     var guardians: IndexedSeq[ActorRef[GuardianMessage]] = IndexedSeq.empty
 
-    val criticalSectionRequests:mutable.Queue[(Double, Int)] = mutable.Queue.empty
+    val criticalSectionRequests:mutable.Queue[(Int, Int)] = mutable.Queue.empty
     val criticalSectionReplies:mutable.Queue[Int] = mutable.Queue.empty
     val remoteCriticalSectionRequests: mutable.Queue[ActorRef[GuardianMessage]] = mutable.Queue.empty
+    var logicalClock: Int = initialClock
 
     Behaviors.receiveMessage {
       case GuardiansUpdated(newGuardians) =>
@@ -110,15 +111,17 @@ object Guardian {
         }
         Behaviors.same
 
-      case SelectionRequest(currentPosition, timestamp) =>
-        criticalSectionRequests.append((timestamp, currentPosition))
+      case SelectionRequest(currentPosition) =>
+        logicalClock = logicalClock + 1
+        criticalSectionRequests.append((logicalClock, currentPosition))
         for (guardian <- guardians) {
-          guardian ! CriticalSectionRequest(timestamp, ctx.self)
+          guardian ! CriticalSectionRequest(logicalClock, ctx.self, this.id)
         }
         Behaviors.same
 
-      case CriticalSectionRequest(timestamp, replyTo) =>
-        if(criticalSectionRequests.isEmpty || criticalSectionRequests.head._1 >= timestamp) {
+      case CriticalSectionRequest(timestamp, replyTo, remoteId) =>
+        logicalClock = Integer.max(logicalClock, timestamp)
+        if(replyTo.path == ctx.self.path || criticalSectionRequests.isEmpty || timestamp < criticalSectionRequests.head._1 || remoteId < this.id) {
           replyTo ! CriticalSectionOK(id)
         } else {
           remoteCriticalSectionRequests append replyTo
@@ -128,7 +131,6 @@ object Guardian {
       case CriticalSectionOK(remoteId) =>
         criticalSectionReplies append remoteId
         if(criticalSectionReplies.size == guardians.size) {
-
           //NOTIFY OTHER GUADIANS OF MY SELECTION IN CRITICAL SECTION
           val currentPosition = criticalSectionRequests.dequeue()._2
           for (guardian <- guardians) {
@@ -151,7 +153,7 @@ object Guardian {
         Behaviors.same
 
       case Marker(replyTo, joiner) =>
-        inCut(ctx, player, guardians, replyTo, joiner)
+        inCut(ctx, player, guardians, replyTo, joiner, logicalClock)
     }
   }
 
@@ -168,7 +170,8 @@ object Guardian {
                     player: ActorRef[PlayerMessage],
                     oldGuardians: IndexedSeq[ActorRef[GuardianMessage]],
                     replyTo: ActorRef[GuardianMessage],
-                    joiner: ActorRef[StartEvent]
+                    joiner: ActorRef[StartEvent],
+                    logicalClock: Int
                    ): Behavior[GuardianMessage] = {
 
     var guardians: IndexedSeq[ActorRef[GuardianMessage]] = oldGuardians
@@ -206,10 +209,10 @@ object Guardian {
         for(msg <- messageQueue) {
           ctx.self ! msg
         }
-        inGame(ctx, player)
+        inGame(ctx, player, initialClock = logicalClock)
 
-      case CriticalSectionRequest(timestamp, replyToCS) =>
-        messageQueue append CriticalSectionRequest(timestamp, replyToCS)
+      case CriticalSectionRequest(timestamp, replyToCS, remoteId) =>
+        messageQueue append CriticalSectionRequest(timestamp, replyToCS, remoteId)
         Behaviors.same
 
       case GuardiansUpdated(newGuardians) =>
