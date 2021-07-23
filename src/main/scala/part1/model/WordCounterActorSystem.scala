@@ -134,20 +134,17 @@ object Counter {
 object Gatherer {
   var globalOccurrences:Map[String, Int] = Map()
   var elaboratedWords:Int = 0
-  var totalPages:Int = 0
   var chunksToReceive:Int = 0
   var receivedMessages:Int = 0
 
   def apply(limit: Int, controller: Controller): Behavior[Output] = {
     globalOccurrences = Map()
     elaboratedWords = 0
-    totalPages = 0
     chunksToReceive = 0
     receivedMessages = 0
 
     Behaviors.receiveMessage {
       case Pages(numberOfPages) =>
-        totalPages += numberOfPages
         chunksToReceive += (numberOfPages / Stripper.CHUNK_SIZE) + (if(numberOfPages % Stripper.CHUNK_SIZE==0) 0 else 1)
         Behaviors.same
       case Occurrences(occurrences, words, _) =>

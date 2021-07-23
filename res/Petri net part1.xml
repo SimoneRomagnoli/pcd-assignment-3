@@ -1,0 +1,740 @@
+<?xml version="1.0" encoding="ISO-8859-1"?><pnml>
+    <net id="Net-One" type="P/T net">
+        <token id="ACTOR" enabled="true" red="0" green="0" blue="0"/>
+        <token id="OCCURRENCES" enabled="true" red="0" green="0" blue="255"/>
+        <token id="PARAMETERS" enabled="true" red="255" green="200" blue="0"/>
+        <token id="PDF" enabled="true" red="0" green="255" blue="0"/>
+        <token id="TEXT" enabled="true" red="255" green="0" blue="0"/>
+        <labels x="877" y="298" width="180" height="87" border="true">
+            <text>BLACK = ACTORS
+ORANGE = PARAMETERS
+GREEN = PDF
+RED = TEXT
+BLUE = OCCURRENCES</text>
+        </labels>
+        <place id="CHUNKS">
+            <graphics>
+                <position x="765.0" y="420.0"/>
+            </graphics>
+            <name>
+                <value>CHUNKS</value>
+                <graphics>
+                    <offset x="74.0" y="39.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>ACTOR,0,TEXT,0,OCCURRENCES,0,PDF,0,PARAMETERS,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="COUNTER">
+            <graphics>
+                <position x="570.0" y="420.0"/>
+            </graphics>
+            <name>
+                <value>COUNTER</value>
+                <graphics>
+                    <offset x="71.0" y="48.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>TEXT,0,ACTOR,1,OCCURRENCES,0,PDF,0,PARAMETERS,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="EXTRACTOR">
+            <graphics>
+                <position x="420.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>EXTRACTOR</value>
+                <graphics>
+                    <offset x="59.0" y="-12.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>ACTOR,1,TEXT,0,OCCURRENCES,0,PDF,0,PARAMETERS,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="GATHERER">
+            <graphics>
+                <position x="345.0" y="420.0"/>
+            </graphics>
+            <name>
+                <value>GATHERER</value>
+                <graphics>
+                    <offset x="84.0" y="38.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>ACTOR,1,OCCURRENCES,0,TEXT,0,PDF,0,PARAMETERS,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="GUI">
+            <graphics>
+                <position x="165.0" y="150.0"/>
+            </graphics>
+            <name>
+                <value>GUI</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>ACTOR,0,PARAMETERS,1,TEXT,0,OCCURRENCES,0,PDF,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="PDF DIRECTORY">
+            <graphics>
+                <position x="495.0" y="150.0"/>
+            </graphics>
+            <name>
+                <value>PDF DIRECTORY</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>OCCURRENCES,0,ACTOR,0,TEXT,0,PDF,5,PARAMETERS,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="STRIPPER">
+            <graphics>
+                <position x="585.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>STRIPPER</value>
+                <graphics>
+                    <offset x="38.0" y="-9.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>OCCURRENCES,0,ACTOR,1,TEXT,0,PDF,0,PARAMETERS,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="STRIPPER CHILDS">
+            <graphics>
+                <position x="765.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>STRIPPER CHILDS</value>
+                <graphics>
+                    <offset x="72.0" y="-16.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>ACTOR,0,TEXT,0,OCCURRENCES,0,PDF,0,PARAMETERS,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="WORD COUNTER">
+            <graphics>
+                <position x="240.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>WORD COUNTER</value>
+                <graphics>
+                    <offset x="107.0" y="-14.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>ACTOR,1,TEXT,0,OCCURRENCES,0,PDF,0,PARAMETERS,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <transition id="countOccurrences()">
+            <graphics>
+                <position x="480.0" y="420.0"/>
+            </graphics>
+            <name>
+                <value>countOccurrences()</value>
+                <graphics>
+                    <offset x="47.0" y="-8.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="createChunks()">
+            <graphics>
+                <position x="765.0" y="330.0"/>
+            </graphics>
+            <name>
+                <value>createChunks()</value>
+                <graphics>
+                    <offset x="-5.0" y="35.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="pdfFinished()">
+            <graphics>
+                <position x="180.0" y="375.0"/>
+            </graphics>
+            <name>
+                <value>pdfFinished()</value>
+                <graphics>
+                    <offset x="38.0" y="47.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="sendChunks()">
+            <graphics>
+                <position x="660.0" y="420.0"/>
+            </graphics>
+            <name>
+                <value>sendChunks()</value>
+                <graphics>
+                    <offset x="44.0" y="-8.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="sendParameters()">
+            <graphics>
+                <position x="345.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>sendParameters()</value>
+                <graphics>
+                    <offset x="67.0" y="50.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="spawn()">
+            <graphics>
+                <position x="675.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>spawn()</value>
+                <graphics>
+                    <offset x="43.0" y="52.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="start()">
+            <graphics>
+                <position x="165.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>start()</value>
+                <graphics>
+                    <offset x="-5.0" y="35.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="stop()">
+            <graphics>
+                <position x="240.0" y="150.0"/>
+            </graphics>
+            <name>
+                <value>stop()</value>
+                <graphics>
+                    <offset x="-5.0" y="35.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="takePDF()">
+            <graphics>
+                <position x="495.0" y="240.0"/>
+            </graphics>
+            <name>
+                <value>takePDF()</value>
+                <graphics>
+                    <offset x="76.0" y="46.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="updatGUI()">
+            <graphics>
+                <position x="255.0" y="480.0"/>
+            </graphics>
+            <name>
+                <value>updatGUI()</value>
+                <graphics>
+                    <offset x="4.0" y="21.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <arc id="CHUNKS to sendChunks()" source="CHUNKS" target="sendChunks()">
+            <graphics/>
+            <inscription>
+                <value>TEXT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="762" y="432" curvePoint="false"/>
+            <arcpath id="001" x="676" y="432" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="COUNTER to countOccurrences()" source="COUNTER" target="countOccurrences()">
+            <graphics/>
+            <inscription>
+                <value>TEXT,1,ACTOR,1,OCCURRENCES,0,PDF,0,PARAMETERS,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="567" y="432" curvePoint="false"/>
+            <arcpath id="001" x="496" y="432" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="countOccurrences() to COUNTER" source="countOccurrences()" target="COUNTER">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="492" y="447" curvePoint="false"/>
+            <arcpath id="001" x="492" y="492" curvePoint="false"/>
+            <arcpath id="002" x="582" y="492" curvePoint="false"/>
+            <arcpath id="003" x="582" y="447" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="countOccurrences() to GATHERER" source="countOccurrences()" target="GATHERER">
+            <graphics/>
+            <inscription>
+                <value>OCCURRENCES,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="486" y="432" curvePoint="false"/>
+            <arcpath id="001" x="371" y="432" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="EXTRACTOR to takePDF()" source="EXTRACTOR" target="takePDF()">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1,TEXT,0,OCCURRENCES,0,PDF,0,PARAMETERS,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="446" y="252" curvePoint="false"/>
+            <arcpath id="001" x="501" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="GATHERER to updatGUI()" source="GATHERER" target="updatGUI()">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="342" y="432" curvePoint="false"/>
+            <arcpath id="001" x="267" y="432" curvePoint="false"/>
+            <arcpath id="002" x="267" y="477" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="GUI to start()" source="GUI" target="start()">
+            <graphics/>
+            <inscription>
+                <value>PARAMETERS,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="177" y="176" curvePoint="false"/>
+            <arcpath id="001" x="177" y="237" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="PDF DIRECTORY to takePDF()" source="PDF DIRECTORY" target="takePDF()">
+            <graphics/>
+            <inscription>
+                <value>PDF,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="507" y="176" curvePoint="false"/>
+            <arcpath id="001" x="507" y="237" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="sendChunks() to COUNTER" source="sendChunks()" target="COUNTER">
+            <graphics/>
+            <inscription>
+                <value>TEXT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="666" y="432" curvePoint="false"/>
+            <arcpath id="001" x="596" y="432" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="sendParameters() to EXTRACTOR" source="sendParameters()" target="EXTRACTOR">
+            <graphics/>
+            <inscription>
+                <value>PARAMETERS,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="361" y="252" curvePoint="false"/>
+            <arcpath id="001" x="417" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="sendParameters() to WORD COUNTER" source="sendParameters()" target="WORD COUNTER">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="357" y="267" curvePoint="false"/>
+            <arcpath id="001" x="357" y="316" curvePoint="false"/>
+            <arcpath id="002" x="252" y="316" curvePoint="false"/>
+            <arcpath id="003" x="252" y="267" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="spawn() to STRIPPER" source="spawn()" target="STRIPPER">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="687" y="267" curvePoint="false"/>
+            <arcpath id="001" x="687" y="316" curvePoint="false"/>
+            <arcpath id="002" x="597" y="316" curvePoint="false"/>
+            <arcpath id="003" x="597" y="267" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="spawn() to STRIPPER CHILDS" source="spawn()" target="STRIPPER CHILDS">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1,TEXT,0,OCCURRENCES,0,PDF,1,PARAMETERS,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="691" y="252" curvePoint="false"/>
+            <arcpath id="001" x="762" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="start() to WORD COUNTER" source="start()" target="WORD COUNTER">
+            <graphics/>
+            <inscription>
+                <value>PARAMETERS,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="181" y="252" curvePoint="false"/>
+            <arcpath id="001" x="237" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="STRIPPER CHILDS to createChunks()" source="STRIPPER CHILDS" target="createChunks()">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1,TEXT,0,OCCURRENCES,0,PDF,1,PARAMETERS,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="777" y="266" curvePoint="false"/>
+            <arcpath id="001" x="777" y="327" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="STRIPPER to spawn()" source="STRIPPER" target="spawn()">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1,TEXT,0,OCCURRENCES,0,PDF,1,PARAMETERS,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="611" y="252" curvePoint="false"/>
+            <arcpath id="001" x="681" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="takePDF() to EXTRACTOR" source="takePDF()" target="EXTRACTOR">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1,TEXT,0,OCCURRENCES,0,PDF,0,PARAMETERS,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="507" y="267" curvePoint="false"/>
+            <arcpath id="001" x="507" y="316" curvePoint="false"/>
+            <arcpath id="002" x="432" y="316" curvePoint="false"/>
+            <arcpath id="003" x="432" y="267" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="takePDF() to STRIPPER" source="takePDF()" target="STRIPPER">
+            <graphics/>
+            <inscription>
+                <value>PDF,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="511" y="252" curvePoint="false"/>
+            <arcpath id="001" x="582" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="updatGUI() to GATHERER" source="updatGUI()" target="GATHERER">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="271" y="492" curvePoint="false"/>
+            <arcpath id="001" x="357" y="492" curvePoint="false"/>
+            <arcpath id="002" x="357" y="447" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="WORD COUNTER to pdfFinished()" source="WORD COUNTER" target="pdfFinished()">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="241" y="262" curvePoint="false"/>
+            <arcpath id="001" x="192" y="312" curvePoint="false"/>
+            <arcpath id="002" x="192" y="372" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="WORD COUNTER to stop()" source="WORD COUNTER" target="stop()">
+            <graphics/>
+            <inscription>
+                <value>ACTOR,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="252" y="237" curvePoint="false"/>
+            <arcpath id="001" x="252" y="177" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+    </net>
+</pnml>
