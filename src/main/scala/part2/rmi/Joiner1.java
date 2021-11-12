@@ -19,7 +19,7 @@ public class Joiner1 {
         try {
             //GET REMOTE REGISTRY
             Registry registry = LocateRegistry.getRegistry(Starter.REGISTRY_PORT);
-
+            
             //CREATE OWN MODEL
             RemoteBoard remoteBoard = (RemoteBoard) registry.lookup("boardStatus");
             RemoteBoard remoteBoardStub = (RemoteBoard) UnicastRemoteObject.exportObject(remoteBoard, 0);

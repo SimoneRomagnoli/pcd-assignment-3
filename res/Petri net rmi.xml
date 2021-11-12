@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="ISO-8859-1"?><pnml>
+    <net id="Net-One" type="P/T net">
+        <token id="GUI " enabled="false" red="255" green="200" blue="0"/>
+        <token id="GUI EVENT" enabled="true" red="0" green="255" blue="0"/>
+        <token id="PLAYER" enabled="true" red="0" green="0" blue="0"/>
+        <token id="REMOTE OBJECT" enabled="true" red="255" green="0" blue="0"/>
+        <place id="JOINERS">
+            <graphics>
+                <position x="630.0" y="195.0"/>
+            </graphics>
+            <name>
+                <value>JOINERS</value>
+                <graphics>
+                    <offset x="-1.0" y="-1.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>PLAYER,0,REMOTE OBJECT,0,GUI EVENT,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="LOCAL UPDATE">
+            <graphics>
+                <position x="555.0" y="270.0"/>
+            </graphics>
+            <name>
+                <value>LOCAL UPDATE</value>
+                <graphics>
+                    <offset x="63.0" y="-10.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>REMOTE OBJECT,0,PLAYER,0,GUI EVENT,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="NO REMOTE OBJECT">
+            <graphics>
+                <position x="465.0" y="360.0"/>
+            </graphics>
+            <name>
+                <value>NO REMOTE OBJECT</value>
+                <graphics>
+                    <offset x="84.0" y="47.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>REMOTE OBJECT,0,PLAYER,0,GUI EVENT,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="REMOTE OBJECT">
+            <graphics>
+                <position x="420.0" y="165.0"/>
+            </graphics>
+            <name>
+                <value>REMOTE OBJECT</value>
+                <graphics>
+                    <offset x="121.0" y="34.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>PLAYER,0,REMOTE OBJECT,0,GUI EVENT,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="REMOTE OBJECT OWNER">
+            <graphics>
+                <position x="255.0" y="255.0"/>
+            </graphics>
+            <name>
+                <value>REMOTE OBJECT OWNER</value>
+                <graphics>
+                    <offset x="0.0" y="-1.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>REMOTE OBJECT,0,PLAYER,0,GUI EVENT,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <place id="STARTER">
+            <graphics>
+                <position x="165.0" y="165.0"/>
+            </graphics>
+            <name>
+                <value>STARTER</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </name>
+            <initialMarking>
+                <value>PLAYER,1,REMOTE OBJECT,0,GUI EVENT,0</value>
+                <graphics>
+                    <offset x="0.0" y="0.0"/>
+                </graphics>
+            </initialMarking>
+            <capacity>
+                <value>0</value>
+            </capacity>
+        </place>
+        <transition id="click()">
+            <graphics>
+                <position x="735.0" y="195.0"/>
+            </graphics>
+            <name>
+                <value>click()</value>
+                <graphics>
+                    <offset x="35.0" y="48.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="loadInitalStatus()">
+            <graphics>
+                <position x="255.0" y="165.0"/>
+            </graphics>
+            <name>
+                <value>loadInitalStatus()</value>
+                <graphics>
+                    <offset x="56.0" y="-14.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="newJoiner()">
+            <graphics>
+                <position x="510.0" y="105.0"/>
+            </graphics>
+            <name>
+                <value>newJoiner()</value>
+                <graphics>
+                    <offset x="66.0" y="-11.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="remoteObjectOwnerCrash()">
+            <graphics>
+                <position x="375.0" y="360.0"/>
+            </graphics>
+            <name>
+                <value>remoteObjectOwnerCrash()</value>
+                <graphics>
+                    <offset x="24.5" y="44.875"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="update()">
+            <graphics>
+                <position x="480.0" y="270.0"/>
+            </graphics>
+            <name>
+                <value>update()</value>
+                <graphics>
+                    <offset x="30.0" y="45.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="updateRequest()">
+            <graphics>
+                <position x="630.0" y="270.0"/>
+            </graphics>
+            <name>
+                <value>updateRequest()</value>
+                <graphics>
+                    <offset x="109.0" y="31.0"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <transition id="updateWithRemoteException()">
+            <graphics>
+                <position x="555.0" y="360.0"/>
+            </graphics>
+            <name>
+                <value>updateWithRemoteException()</value>
+                <graphics>
+                    <offset x="158.875" y="39.625"/>
+                </graphics>
+            </name>
+            <orientation>
+                <value>0</value>
+            </orientation>
+            <rate>
+                <value>1.0</value>
+            </rate>
+            <timed>
+                <value>false</value>
+            </timed>
+            <infiniteServer>
+                <value>false</value>
+            </infiniteServer>
+            <priority>
+                <value>1</value>
+            </priority>
+        </transition>
+        <arc id="click() to JOINERS" source="click()" target="JOINERS">
+            <graphics/>
+            <inscription>
+                <value>GUI EVENT,1,PLAYER,1,REMOTE OBJECT,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="741" y="207" curvePoint="false"/>
+            <arcpath id="001" x="656" y="207" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="JOINERS to click()" source="JOINERS" target="click()">
+            <graphics/>
+            <inscription>
+                <value>PLAYER,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="652" y="196" curvePoint="false"/>
+            <arcpath id="001" x="702" y="147" curvePoint="false"/>
+            <arcpath id="002" x="747" y="147" curvePoint="false"/>
+            <arcpath id="003" x="747" y="192" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="JOINERS to updateRequest()" source="JOINERS" target="updateRequest()">
+            <graphics/>
+            <inscription>
+                <value>GUI EVENT,1,PLAYER,0,REMOTE OBJECT,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="642" y="221" curvePoint="false"/>
+            <arcpath id="001" x="642" y="267" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="loadInitalStatus() to REMOTE OBJECT" source="loadInitalStatus()" target="REMOTE OBJECT">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="271" y="177" curvePoint="false"/>
+            <arcpath id="001" x="417" y="177" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="loadInitalStatus() to REMOTE OBJECT OWNER" source="loadInitalStatus()" target="REMOTE OBJECT OWNER">
+            <graphics/>
+            <inscription>
+                <value>PLAYER,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="267" y="192" curvePoint="false"/>
+            <arcpath id="001" x="267" y="252" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="LOCAL UPDATE to update()" source="LOCAL UPDATE" target="update()">
+            <graphics/>
+            <inscription>
+                <value>GUI EVENT,1,PLAYER,0,REMOTE OBJECT,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="552" y="282" curvePoint="false"/>
+            <arcpath id="001" x="496" y="282" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="LOCAL UPDATE to updateWithRemoteException()" source="LOCAL UPDATE" target="updateWithRemoteException()">
+            <graphics/>
+            <inscription>
+                <value>GUI EVENT,1,PLAYER,0,REMOTE OBJECT,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="567" y="296" curvePoint="false"/>
+            <arcpath id="001" x="567" y="357" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="newJoiner() to JOINERS" source="newJoiner()" target="JOINERS">
+            <graphics/>
+            <inscription>
+                <value>PLAYER,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="526" y="117" curvePoint="false"/>
+            <arcpath id="001" x="642" y="117" curvePoint="false"/>
+            <arcpath id="002" x="642" y="192" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="newJoiner() to REMOTE OBJECT" source="newJoiner()" target="REMOTE OBJECT">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="516" y="117" curvePoint="false"/>
+            <arcpath id="001" x="432" y="117" curvePoint="false"/>
+            <arcpath id="002" x="432" y="162" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="NO REMOTE OBJECT to updateWithRemoteException()" source="NO REMOTE OBJECT" target="updateWithRemoteException()">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="491" y="372" curvePoint="false"/>
+            <arcpath id="001" x="561" y="372" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="remoteObjectOwnerCrash() to NO REMOTE OBJECT" source="remoteObjectOwnerCrash()" target="NO REMOTE OBJECT">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="391" y="372" curvePoint="false"/>
+            <arcpath id="001" x="462" y="372" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="REMOTE OBJECT OWNER to remoteObjectOwnerCrash()" source="REMOTE OBJECT OWNER" target="remoteObjectOwnerCrash()">
+            <graphics/>
+            <inscription>
+                <value>PLAYER,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="267" y="282" curvePoint="false"/>
+            <arcpath id="001" x="267" y="372" curvePoint="false"/>
+            <arcpath id="002" x="381" y="372" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="REMOTE OBJECT to newJoiner()" source="REMOTE OBJECT" target="newJoiner()">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="447" y="177" curvePoint="false"/>
+            <arcpath id="001" x="522" y="177" curvePoint="false"/>
+            <arcpath id="002" x="522" y="132" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="REMOTE OBJECT to remoteObjectOwnerCrash()" source="REMOTE OBJECT" target="remoteObjectOwnerCrash()">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="421" y="187" curvePoint="false"/>
+            <arcpath id="001" x="387" y="222" curvePoint="false"/>
+            <arcpath id="002" x="387" y="357" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="REMOTE OBJECT to update()" source="REMOTE OBJECT" target="update()">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="442" y="187" curvePoint="false"/>
+            <arcpath id="001" x="492" y="237" curvePoint="false"/>
+            <arcpath id="002" x="492" y="267" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="STARTER to loadInitalStatus()" source="STARTER" target="loadInitalStatus()">
+            <graphics/>
+            <inscription>
+                <value>PLAYER,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="191" y="177" curvePoint="false"/>
+            <arcpath id="001" x="261" y="177" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="update() to REMOTE OBJECT" source="update()" target="REMOTE OBJECT">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="486" y="282" curvePoint="false"/>
+            <arcpath id="001" x="432" y="282" curvePoint="false"/>
+            <arcpath id="002" x="432" y="192" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="updateRequest() to LOCAL UPDATE" source="updateRequest()" target="LOCAL UPDATE">
+            <graphics/>
+            <inscription>
+                <value>GUI EVENT,1,PLAYER,0,REMOTE OBJECT,0</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="636" y="282" curvePoint="false"/>
+            <arcpath id="001" x="581" y="282" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+        <arc id="updateWithRemoteException() to REMOTE OBJECT" source="updateWithRemoteException()" target="REMOTE OBJECT">
+            <graphics/>
+            <inscription>
+                <value>REMOTE OBJECT,1</value>
+                <graphics/>
+            </inscription>
+            <tagged>
+                <value>false</value>
+            </tagged>
+            <arcpath id="000" x="571" y="372" curvePoint="false"/>
+            <arcpath id="001" x="792" y="372" curvePoint="false"/>
+            <arcpath id="002" x="792" y="57" curvePoint="false"/>
+            <arcpath id="003" x="372" y="57" curvePoint="false"/>
+            <arcpath id="004" x="372" y="117" curvePoint="false"/>
+            <arcpath id="005" x="421" y="166" curvePoint="false"/>
+            <type value="normal"/>
+        </arc>
+    </net>
+</pnml>
